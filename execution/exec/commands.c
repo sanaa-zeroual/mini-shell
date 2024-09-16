@@ -64,7 +64,7 @@ char **get_command(ASTNode *cmd)
 
     while (i < cmd->arg_nbr)
     {
-        arr[i] = ft_strdup(cmd->arguments[i]->value); // Get the command and its arguments
+        arr[i] = ft_strdup(cmd->arguments[i]->value);
         if (!arr[i])
         {
             perror("ft_strdup error");
@@ -75,7 +75,7 @@ char **get_command(ASTNode *cmd)
         }
         i++;
     }
-    arr[cmd->arg_nbr] = NULL; // Null-terminate the argument array
+    arr[cmd->arg_nbr] = NULL; 
     return arr;
 }
 
@@ -89,20 +89,20 @@ void execute_ast(ASTNode *node, t_mini *box)
         create_pipe(node->left, node->right);
 
         pid_t pid_left = fork();
-        if (pid_left == 0) // Child process executes the left command
+        if (pid_left == 0) 
         {
             execute_ast(node->left, box);
             exit(0);
         }
 
         pid_t pid_right = fork();
-        if (pid_right == 0) // Child process executes the right command
+        if (pid_right == 0) 
         {
             execute_ast(node->right, box);
             exit(0);
         }
 
-        waitpid(pid_left, NULL, 0); // Wait for the left command to finish
+        waitpid(pid_left, NULL, 0); 
         waitpid(pid_right, NULL, 0); // Wait for the right command to finish
         return;
     }
