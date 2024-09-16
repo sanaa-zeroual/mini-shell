@@ -116,9 +116,9 @@ void execute_ast(ASTNode *node, t_mini *box)
     }
     else if (node->type == COMMAND)
     {
-        if (is_builtin(node)) // Check if it's a built-in command
+        if (is_builtin(node))
         {
-            char **av = get_command(node); // Get the arguments for the built-in command
+            char **av = get_command(node);
             if (!av)
                 return;
             int status = builtins(av, box, 0);
@@ -126,7 +126,7 @@ void execute_ast(ASTNode *node, t_mini *box)
         }
         else // External command
         {
-            char **av = get_command(node); // Get the arguments for the external command
+            char **av = get_command(node); 
             if (!av)
                 return;
 
@@ -141,21 +141,20 @@ void execute_ast(ASTNode *node, t_mini *box)
                 dup2(node->fd_out, STDOUT_FILENO);
                 close(node->fd_out);
             }
-
-            char **command_path = get_path(box); // Get PATH from the environment
+            char **command_path = get_path(box); 
             if (!command_path)
                 return;
 
-            // Loop through each directory in PATH to find the correct command
+            
             int i = 0;
             char *full_path = NULL;
             while (command_path[i])
             {
                 full_path = ft_strjoin(command_path[i], "/");
-                full_path = ft_strjoin(full_path, av[0]); // Combine dir + command
-                if (access(full_path, X_OK) == 0) // Check if the command is executable
+                full_path = ft_strjoin(full_path, av[0]); 
+                if (access(full_path, X_OK) == 0) 
                 {
-                    execve(full_path, av, box->env); // Execute the command
+                    execve(full_path, av, box->env); 
                 }
                 i++;
                 free(full_path);
