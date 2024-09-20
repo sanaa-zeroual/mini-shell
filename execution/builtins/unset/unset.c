@@ -31,12 +31,16 @@ void ft_remove(t_mini *box)
 	}
 }
 
-int ft_unset(t_mini *box)
+int	ft_unset(char **ptr, t_mini *box)
 {
-	char **av = box->ptr;
-	int i = 0;
-	t_envi *curr;
-	while(av[i])
+	t_envi	*current;
+	t_envi	*previous;
+
+	current = box->env = NULL;
+	previous = NULL;
+	if (ptr[1])
 		ft_remove(box);
-	return 0;
+	else
+		return (0);
+	return (0);
 }

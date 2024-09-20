@@ -51,7 +51,7 @@ void free_tokens(Token *tokens)
 
 int ft_is_separator(char c)
 {
-	if(c == '>' || c == '<' || c == '\n' || c == '\t' ||c == '|' || c == ' ' || c == '\'')
+	if(c == '>' || c == '<' || c == '\n' || c == '\t' ||c == '|' || c == ' ' || c == '\t')
 	    return 1;
 	return (0);
 }
@@ -84,35 +84,27 @@ char *handle_Parentheses(char *str, char c)
 
 char *handle_quote(char *str, char c)
 {
-	int i = 1;
-    int j = 0;
-    char *word;
+	int		i;
+    char	*word;
 
-    while (str[i] && str[i] != c && ft_is_separator(str[i]) && str[i])
+	i = 1;
+	if (strchr(str + 1, c))
 	{
-        i++;
-        while (str[i] == ' ')
-            i++;
-    }
-    while (ft_is_separator(str[i]))
-    {
-        i++;
-    }
-    word = malloc(j + 2);
-    if (!word)
+		while (str[i] && str[i] != c)
+			i++;
+		while (!ft_is_separator(str[i]))
+			i++;
+		word = strndup(str, i + 1);
+	}
+	else
 	{
-        fprintf(stderr, "Error: memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-    i = 0;
-    while (i <= j)
-    {
-        word[i] = str[i];
-        i++;
-    }
-    word[i] = '\0';
+		while (!ft_is_separator(str[i]))
+			i++;
+		word = strndup(str, i + 1);
+	}
     return word;
 }
+
 int built_in_checker(const char *str)
 {
     if (!strcmp(str,"export") || !strcmp(str,"cd") || !strcmp(str,"pwd") ||
@@ -133,12 +125,8 @@ int get_token_type(const char *token, char c)
         return TOKEN_BUILT_IN;
     if (get_executable((char *)token))
         return TOKEN_COMMAND;
-    if (!strcmp(token, "?"))
-        return TOKEN_QUESTION;
     if (!strcmp(token, "~"))
         return TOKEN_TILDLE;
-    if (!strcmp(token, "."))
-        return TOKEN_DOT;
     if (!strcmp(token, "<<"))
         return TOKEN_REDIR_HERE_DOC;
     if (!strcmp(token, ">"))
@@ -153,8 +141,6 @@ int get_token_type(const char *token, char c)
         return TOKEN_DOUBLE_PIPE;
     if (!strcmp(token, "&&"))
         return TOKEN_DOUBLE_AMP;
-    if (!strcmp(token, ";"))
-        return TOKEN_SEMICOLON;
     if (!strcmp(token, "(") || !strcmp(token, "[") || !strcmp(token, "{"))
         return TOKEN_OPEN_PARENTH;
     if (!strcmp(token, ")") || !strcmp(token, "]") || !strcmp(token, "}"))
@@ -233,7 +219,7 @@ int ft_strchr(char *string, char *delimiteur, int *l)
     i = 0;
     if (!splited)
     {
-        printf("Error\n");
+        printf ("Error\n");
         return (0);
     }
     while (splited[i])
@@ -251,20 +237,16 @@ int find_delimiter_in_lines(char *string, char *delimiter, int *l)
     int     i;
     char    **splitted;
 
-	i = 0;
-	while (string[i] && string [i] == '<' && string[i] == ' ')
-		i++;
-	l += i;
     splitted = ft_split(string, '\n');
     if (!splitted)
 	{
-        printf("Error\n");
-        return (0);
+        printf("Allocation Failed\n");
+        exit (0);
     }
 	i = 0;
     while (splitted[i])
 	{
-        *l = *l + strlen(splitted[i]);
+		*l = *l + strlen(splitted[i]);
         if (!strcmp(splitted[i], delimiter))
             return (1);
         i++;
@@ -291,29 +273,26 @@ char *heredoc_token(char *input, int l)
 
 char *handle_heredoc(char *input, int *n)
 {
-    int     i = 0;
-    int     j = 0;
-    int     k = 0;
-    char    *delimiter;
-    int     l = 0;
+    int		i;
+    int		k = 0;
+    char	*delimiter;
+    int		l = 0;
 
     *n = 0;
-    while (input[i] && (input[i] == '<' || input[i] == ' '))
+    i = 0;
+    while (input[i] && (input[i] == '<' || input[i] == ' ' || input[i] == '\t'))
         i++;
-    k = i;
-    while (input[i] != ' ' && input[i] != '\0' && input[i] != '\n')
-        i++;
-    j = i - k;
-    delimiter = malloc(j + 1);
-    if (!delimiter)
-	{
-        perror("Error\n");
-        exit(1);
+    if (ft_is_separator(input[i]))
+    {
+        printf("Syntax Error.\n");
+        exit (1);
     }
-	l = i;
-    strncpy(delimiter, input + j, k);
-    delimiter[j] = '\0';
-    if (!find_delimiter_in_lines(input, delimiter, &l))
+    k = i;
+    while (input[k] != ' ' && input[k] != '\t' && input[k] != '\n')
+        k++;
+    delimiter = strndup(input + i , k - i);
+    l = k + i;
+    if (!find_delimiter_in_lines(input + k + 1, delimiter, &l))
 	{
         printf("Syntax Error.\n");
         free(delimiter);
@@ -374,13 +353,21 @@ void handle_word(char *input, Token **tokens, int *j, int *k)
     int		token_type;
 	char	*word;
     int		i;
+    char    *str;
 
     i = 0;
     while (input[i] && !ft_is_separator(input[i]))
+    {
+        if (input[i] == '"' || input[i]== '\'')
+        {
+            str = handle_quote(input + i, input[i]);
+            i += strlen(str);
+        }
         i++;
+    }
     word = strndup(input, i);
     token_type = get_token_type(word, 0);
-    if ((token_type == 26 || token_type == 29) && *k == 0)
+    if ((token_type == 14 || token_type == 11) && *k == 0)
     {
         add_token(tokens, token_type, word);
         *k = 1;
@@ -421,7 +408,7 @@ Token **tokenize(char *input)
         }
         else if (input[i] == '<' && input[i + 1] && input[i+1] == '<')
         {
-            word = handle_heredoc(input+i, &k);
+            word = handle_heredoc(input + i, &k);
             add_token(tokens, TOKEN_REDIR_HERE_DOC, word);
             i += strlen(word);
         }

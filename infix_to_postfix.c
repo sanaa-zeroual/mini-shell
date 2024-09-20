@@ -39,14 +39,19 @@ t_stack *create_node(Token *token)
     return node;
 }
 
-void enqueue(t_queue **queue, Token *token)
+void enqueue(t_queue **queue, t_stack **stack)
 {
     t_queue *new_node;
     t_queue *temp;
+    t_stack *popped;
 
     new_node = malloc(sizeof(t_queue));
-    new_node->node = token;
+    popped = pop_stack(stack);
+    new_node->node = popped->node->token;
+    new_node->arg = popped->node->arguments;
     new_node->next = NULL;
+    if (popped)
+        free(popped);
     if (*queue == NULL)
         *queue = new_node;
     else
@@ -106,10 +111,7 @@ t_queue *generate_postfix(t_parser *tokens)
     while (head)
     {
         if (is_operand(head->node->token))
-        {
-            enqueue(&output_queue, head->node->token);
-            head = head->next;
-        }
+            enqueue(&output_queue, &head);
         else
         {
             if (!operator_stack)
@@ -121,7 +123,7 @@ t_queue *generate_postfix(t_parser *tokens)
                     while (operator_stack && (!check_precedence(operator_stack, head->node->token->type)))
                     {
                         popped = pop_stack(&operator_stack);
-                        enqueue(&output_queue, popped->node->token);
+                        enqueue(&output_queue, &popped);
                     }
                     push_to_stack(&head, &operator_stack);
                 }
@@ -130,7 +132,7 @@ t_queue *generate_postfix(t_parser *tokens)
                     while (operator_stack && operator_stack->node->token->type != TOKEN_OPEN_PARENTH)
                     {
                         popped = pop_stack(&operator_stack);
-                        enqueue(&output_queue, popped->node->token);
+                        enqueue(&output_queue, &popped);
                     }
                     pop_stack(&operator_stack);
                     head = head->next;
@@ -141,7 +143,8 @@ t_queue *generate_postfix(t_parser *tokens)
     while (operator_stack)
     {
         popped = pop_stack(&operator_stack);
-        enqueue(&output_queue, popped->node->token);
+        enqueue(&output_queue, &popped);
     }
-    return output_queue;
+    return (output_queue);
 }
+

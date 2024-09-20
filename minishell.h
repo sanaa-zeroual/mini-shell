@@ -5,13 +5,11 @@
 #include <readline/history.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <string.h>
 #include <stdbool.h>
 #include <signal.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 
 #define PREC_WHITESPACES          25  
 #define PREC_BACKTICK             24
@@ -41,23 +39,8 @@
 
 typedef enum
 {
-	TOKEN_WHITESPACES,    // (” “, “\t”, etc.
-	TOKEN_NEW_LINE,       // "\n"
-	TOKEN_COLON,          // ";"
-	TOKEN_SLASH,          // "/"
-	TOKEN_ASTERISK,       // "*" wildcard
-	TOKEN_EQUALS,         // "="
-	TOKEN_PLUS,           // "+"
-	TOKEN_EXCLAMATION,    // "!"
-	TOKEN_AMPERSAND,      // "&"
 	TOKEN_DOUBLE_AMP,     // "&&"
-	TOKEN_BACKTICK,       // "`"
 	TOKEN_TILDLE,         // "~"
-	TOKEN_SEMICOLON,      // ";"
-	TOKEN_BACKSLASH,      // "\"
-	TOKEN_DOT,            // "."
-	TOKEN_QUESTION,       // "?""
-	TOKEN_MINUS,          // "-"
 	TOKEN_PIPE,           // "|"
 	TOKEN_DOUBLE_PIPE,    // "||"
 	TOKEN_REDIR_IN,       //"<"
@@ -80,17 +63,10 @@ typedef struct token
 {
 	TokenType		type;
 	char			*value;
-	char			*expanded_value;
+	char			**expanded_value;
 	struct token	*next;
 	struct token	*previous;
 }					Token;
-
-typedef struct parse
-{
-	Token *token;
-	Token   **arguments; 
-	struct parse *next;
-}t_parser;
 
 typedef enum 
 {
@@ -103,38 +79,36 @@ typedef enum
 	REDERECTION_SEMICOLON,
 }AST_TYPE;
 
-typedef struct ASTNode
+typedef struct parse
 {
-	Token *token; //token for the current node
-	int				fd_in; //fd for the input redirection
-	int				fd_out; //fd for the output redirection 
-	int				arg_nbr; // nmr of args of the command
-	struct ASTNode	*left; // left and right of the child nodes 
-	struct ASTNode	*right;
-	AST_TYPE type;
-	t_parser *ptr;
-}			ASTNode;
+	Token		*token;
+	Token   	**arguments;
+	int         input_fd;
+	int         output_fd;
+	struct parse *next;
+}t_parser;
+
 
 typedef struct s_ast
 {
-	ASTNode			*node; 
+	t_parser		*data;
 	AST_TYPE		type;
 	struct s_ast	*left;
 	struct s_ast	*right;
 	struct s_ast	*next;
-
 }					t_ast;
 
 typedef struct queue
 {
 	Token			*node;
+	Token			**arg;
 	struct queue	*next;
 }					t_queue;
 
 typedef struct stack
 {
 	t_parser			*node;   // Changed to t_ast pointer
-	struct stack	*next;
+	struct stack		*next;
 }					t_stack;
 
 			//**Tokenization**/
@@ -147,13 +121,9 @@ char	*handle_quote(char *str, char c);
 char	**ft_split(char *s, char c);
 char	*ft_strjoin(char const *s1, char const *s2);
 char	*ft_strtrim(char *s1, char *set);
-char	*ft_substr(char *s, unsigned int start, size_t len);
 
 		    //pipex_utils
 char	*get_executable(char *command);
-
-			//parser
-void	ft_parser(Token *tokens);
 
 			//generate_postfix
 t_queue *generate_postfix(t_parser *tokens);
@@ -171,9 +141,7 @@ int		is_operand(Token *node);
 t_ast	*push_to_ast_stack(t_ast *ast_stack, t_ast *ast_node);
 
 			//mini_utils
-void	print_stack(t_stack *head);
 t_stack	*new_stack_node(t_parser *token);
-void	push_top_stack(t_stack **src, t_stack **dest);
 int		check_syntax_errors(Token *tokens);
 char	quote_type(const char *str);
 Token	*create_token(TokenType type, const char *value);
@@ -193,7 +161,8 @@ t_parser *analyse_tokens(Token **tokens);
 void handle_ctrl_c();
 void handle_ctrl_d();
 
-
-
 Token *get_last_token(Token *token);
+
+void print_queue(t_queue *queue);
+void execute_ast(t_ast *root, char **envp);
 #endif

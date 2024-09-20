@@ -34,12 +34,15 @@ void create_node_arguments(t_parser **node, Token **tokens)
 
     i = 0;
     num_args = nbr_argument(*tokens);
-    (*tokens) = (*tokens)->next;
     (*node)->arguments = malloc((num_args + 1) * sizeof(Token *));
-    if (!(*node)->arguments) {
+    if (!(*node)->arguments)
+    {
         perror("malloc failed");
         exit(EXIT_FAILURE);
     }
+    (*node)->arguments[0] = *tokens;
+    (*tokens) = (*tokens)->next;
+    i++;
     while (*tokens && !is_operator(*tokens) &&
            (*tokens)->type != TOKEN_COMMAND && (*tokens)->type != TOKEN_BUILT_IN)
            {

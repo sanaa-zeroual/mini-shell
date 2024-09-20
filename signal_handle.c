@@ -1,7 +1,7 @@
 #include "minishell.h"
 
 #define SIGINT 2    // Ctrl+C
-#define SIGQUIT 3   // Ctrl+
+#define SIGQUIT 3   // Ctrl+D
 #define SIGTERM 15  // Termination signal (not Ctrl+D by default)
 
 #include <signal.h>

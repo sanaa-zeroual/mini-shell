@@ -89,11 +89,11 @@ int handle_consecutive_operator(Token *tokens)
     prev = tokens;
     while (current)
     {
-        if ((prev->type == TOKEN_PIPE || prev->type == TOKEN_DOUBLE_PIPE || prev->type == TOKEN_AMPERSAND || prev->type == TOKEN_DOUBLE_PIPE ||
+        if ((prev->type == TOKEN_PIPE || prev->type == TOKEN_DOUBLE_PIPE || prev->type == TOKEN_DOUBLE_PIPE ||
              prev->type == TOKEN_DOUBLE_AMP || prev->type == TOKEN_REDIR_OUT ||
              prev->type == TOKEN_REDIR_IN || prev->type == TOKEN_REDIR_APPEND ||
              prev->type == TOKEN_REDIR_HERE_DOC) &&
-            (current->type == TOKEN_PIPE || current->type == TOKEN_AMPERSAND || current->type == TOKEN_DOUBLE_PIPE ||
+            (current->type == TOKEN_PIPE || current->type == TOKEN_DOUBLE_PIPE ||
              current->type == TOKEN_DOUBLE_AMP || current->type == TOKEN_REDIR_OUT ||
              current->type == TOKEN_REDIR_IN || current->type == TOKEN_REDIR_APPEND ||
              current->type == TOKEN_REDIR_HERE_DOC))
@@ -127,7 +127,7 @@ int handle_operators_bg_en(Token *tokens)
 	Token *last_node;
 
 	last_node = get_last_token(tokens);
-	if ((is_operator(tokens) && lst_size(tokens) == 1) || is_operator(last_node) || tokens->type == TOKEN_PIPE || tokens->type == TOKEN_DOUBLE_AMP ||tokens->type == TOKEN_DOUBLE_PIPE || tokens->type == TOKEN_SEMICOLON)
+	if ((is_operator(tokens) && lst_size(tokens) == 1 && tokens->type != TOKEN_REDIR_HERE_DOC) || (is_operator(last_node) && last_node->type != TOKEN_REDIR_HERE_DOC) || tokens->type == TOKEN_PIPE || tokens->type == TOKEN_DOUBLE_AMP ||tokens->type == TOKEN_DOUBLE_PIPE)
 	{
 		printf("Syntax Error.\n");
 		return (1);
@@ -237,10 +237,10 @@ int random_case(Token *tokens)
 {
 	while (tokens)
 	{
-		if (is_rederection(tokens->type) && (ft_strchr_sec(tokens->next->value,'(') || ft_strchr_sec(tokens->next->value,')')))
+		if ((is_rederection(tokens->type) && tokens->type != TOKEN_REDIR_HERE_DOC) && (ft_strchr_sec(tokens->next->value,'(') || ft_strchr_sec(tokens->next->value,')')))
 		{
-			printf("Syntax Error.\n");
-			return(1);
+			printf ("Syntax Error.\n");
+			return (1);
 		}
 		tokens = tokens->next;
 	}
@@ -254,11 +254,9 @@ int check_syntax_errors(Token *tokens)
 	// update_tokens(&tokens);
 	if (handle_parentheses(tokens))
 		return(2);
-	if (handle_parentheses(tokens))
-		return (3);
-	// printf("check\n");
 	if (handle_operators_bg_en(tokens))
 		return (5);
+    // printf("check\n");
 	if (handle_consecutive_operator(tokens))
 		return (4);
 	if (random_case(tokens)) //> hola(ls && pwd)  
