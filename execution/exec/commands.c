@@ -71,7 +71,6 @@ char **get_command(t_ast *cmd)
         perror("malloc error");
         return NULL;
     }
-
     int i = 0;
     while (i < arg_count)
     {
@@ -184,3 +183,4 @@ void execute_ast(t_ast *node, t_mini *box)
         }
     }
 }
+

@@ -1,7 +1,6 @@
 #include "../mini.h"
 #include "../libftt/libft.h"
 
-
 int is_n_option(char *arg)
 {
     int i = 0;

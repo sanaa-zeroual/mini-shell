@@ -30,7 +30,7 @@ int is_builtin(char *cmd)
         strcmp(cmd, "env") == 0 ||
         strcmp(cmd, "unset") == 0)
     {
-        return 1; // it's a built-in command
+        return 1; 
     }
-    return 0; // not a built-in command
+    return 0; 
 }
