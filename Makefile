@@ -24,6 +24,9 @@ SRCS =  mnsh.c \
         execution/builtins/unset/unset.c \
         execution/builtins/builtins.c \
 		execution/builtins/export/export.c \
+        execution/handle_command.c \
+        execution/handle_pipe.c \
+        execution/handle.redirection.c \
         $(wildcard libft/*.c) \
         $(wildcard execution/libftt/*.c)
 

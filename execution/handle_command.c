@@ -1,37 +1,61 @@
 #include "../minishell.h"
 
 
-char **convert_env_to_array(t_env *env) {
+char **convert_env_to_array(t_envi *env)
+{
     int count = 0;
-    t_env *temp = env;
-    
-    // Count the number of environment variables
-    while (temp) {
+    t_envi *temp = env;
+    while (temp)
+    {
         count++;
         temp = temp->next;
     }
-
-    // Allocate memory for the array of strings
     char **env_array = malloc(sizeof(char *) * (count + 1));
-    if (!env_array) {
+    if (!env_array)
+    {
         perror("malloc error");
         return NULL;
     }
-
-    // Populate the array with environment variables
     int i = 0;
-    while (env) {
-        env_array[i] = ft_strjoin(env->name, "="); // Add the key
-        char *value = env->value ? ft_strdup(env->value) : ""; // Handle NULL values
-        env_array[i] = ft_strjoin(env_array[i], value); // Append the value
-        free(value);
+    while (env)
+    {
+        if (env->vale)
+        {
+            env_array[i] = malloc(strlen(env->name) + strlen(env->vale) + 2);
+            if (!env_array[i])
+            {
+                perror("malloc error");
+                while (i > 0)
+                {
+                    free(env_array[--i]);
+                }
+                free(env_array);
+                return NULL;
+            }
+            sprintf(env_array[i], "%s=%s", env->name, env->vale);
+        }
+        else
+        {
+            env_array[i] = malloc(strlen(env->name) + 2);
+            if (!env_array[i])
+            {
+                perror("malloc error");
+                while (i > 0)
+                {
+                    free(env_array[--i]);
+                }
+                free(env_array);
+                return NULL;
+            }
+            sprintf(env_array[i], "%s=", env->name);
+        }
         env = env->next;
         i++;
     }
-    env_array[i] = NULL; // Null-terminate the array
-
+    env_array[i] = NULL;
     return env_array;
 }
+
 
 
 int count_arguments(char **arguments)
@@ -84,7 +108,6 @@ void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds)
 {
     if (!node)
         return;
-
     if (node->type == PIPELINE)
         execute_pipeline(node, pipe_fds);
     else if (node->type == COMMAND)
@@ -107,14 +130,12 @@ void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds)
                 free(av);
                 return;
             }
-
-            // Prepare the environment array for execve
             char **env_array = convert_env_to_array(box->env);
-            if (!env_array) {
+            if (!env_array)
+            {
                 free(av);
                 return;
             }
-
             if (node->data->input_fd != STDIN_FILENO)
             {
                 dup2(node->data->input_fd, STDIN_FILENO);
@@ -134,11 +155,11 @@ void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds)
                 full_path = ft_strjoin(temp, av[0]);
                 free(temp);
 
-                if (access(full_path, X_OK) == 0) // Check if the command is executable
+                if (access(full_path, X_OK) == 0) 
                 {
-                    execve(full_path, av, env_array); // Execute the command
+                    execve(full_path, av, env_array);
                     perror("execve error");
-                    exit(EXIT_FAILURE); // Exit if execve fails
+                    exit(EXIT_FAILURE); 
                 }
                 free(full_path);
                 i++;
@@ -152,8 +173,6 @@ void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds)
                 i++;
             }
             free(command_path);
-
-            // Free the environment array
             i = 0;
             while (env_array[i])
             {
