@@ -1,8 +1,8 @@
 #include "../../minishell.h"
 
-int builtins(char **av, t_mini *box, int val)
+int builtins(char **av, t_mini *box)
 {
-    (void)val;
+    
     int status = 0;
     if(strcmp(av[0], "cd")==0)
        status = ft_cd(av, box->env);

@@ -226,7 +226,8 @@ pid_t left_pipe(t_ast *cmd, t_pipe *pipe_fds);
 void execute_pipeline(t_ast *cmd, t_pipe *pipe_fds);
 
 		//builtins
-int builtins(char **av, t_mini *box, int val);
+		
+int builtins(char **av, t_mini *box);
 int is_builtin(char *cmd);
 void ft_putstr_fd(char *str, int fd);
 int	ft_cd(char **ptr, t_envi *envi);
@@ -242,4 +243,10 @@ int	ft_export(char **ptr, t_envi *env);
 int  ft_pwd(char **av);
 int	ft_exit(t_shell *shell);
 int ft_env(t_envi *env);
+
+		//extenal command
+char **get_command(t_ast *cmd);
+char **get_path();
+int count_arguments(char **arguments);
+void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds);
 #endif
