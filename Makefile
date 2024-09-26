@@ -1,42 +1,47 @@
-# Compiler and flags
-CC = gcc
 CFLAGS = -Wall -Wextra -Werror
+CC = cc
+LFLAGS = -lreadline
+NAME = minishell
 
-# Source directories
-SRC_DIR = parsing execution libftt
-OBJ_DIR = objs
-BIN = minishell
+# Use wildcard to gather all .c files from libft and libftt directories
+SRCS =  mnsh.c \
+        parsing/main.c \
+        parsing/analyse_tokens.c \
+        parsing/expand.c \
+        parsing/token_into_stack.c \
+        parsing/signal_handle.c \
+        parsing/postfix_to_tree.c \
+        parsing/minishell_utils.c \
+        parsing/tokenization.c \
+        parsing/infix_to_postfix.c \
+        parsing/pipex_utils.c \
+        parsing/parser.c \
+        execution/builtins/cd/cd.c \
+        execution/builtins/echo/echo.c \
+        execution/builtins/env/env.c \
+        execution/builtins/exit/exit.c \
+        execution/builtins/pwd/pwd.c \
+        execution/builtins/unset/unset.c \
+        execution/builtins/builtins.c \
+		execution/builtins/export/export.c \
+        $(wildcard libft/*.c) \
+        $(wildcard execution/libftt/*.c)
 
-# Source files
-PARSE_SRCS = $(wildcard parsing/*.c)
-EXEC_SRCS = $(wildcard execution/*.c)
-LIBFT_SRCS = $(wildcard libftt/*.c)
+# Generate object file names from source file names
+OBJS = $(SRCS:.c=.o)
 
-# Object files
-PARSE_OBJS = $(PARSE_SRCS:.c=.o)
-EXEC_OBJS = $(EXEC_SRCS:.c=.o)
-LIBFT_OBJS = $(LIBFT_SRCS:.c=.o)
+all: $(NAME)
 
-# Combine all object files
-OBJ = $(PARSE_OBJS) $(EXEC_OBJS) $(LIBFT_OBJS)
+$(NAME): $(OBJS)
+	$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LFLAGS)
 
-# Rule to create the final executable
-$(BIN): $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^
-
-# General rule to compile source files
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean rule
 clean:
-	rm -rf $(OBJ)
+	rm -rf $(OBJS)
 
-# Remove the executable
 fclean: clean
-	rm -rf $(BIN)
+	rm -rf $(NAME)
 
-# Rebuild everything
-re: fclean $(BIN)
-
-.PHONY: clean fclean re
+re: fclean all
