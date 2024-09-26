@@ -1,5 +1,5 @@
-#include "../mini.h"
-#include "../libftt/libft.h"
+#include "../../../minishell.h"
+#include "../../libftt/libft.h"
 
 int is_n_option(char *arg)
 {
@@ -26,7 +26,7 @@ int first_non_option(char **args)
 
 int ft_echo(char **args)
 {
-    int i = find_first_non_option(args);
+    int i = first_non_option(args);
 
     while (args && args[i])
     {

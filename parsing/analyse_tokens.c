@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../minishell.h"
 
 void push_back(t_parser **lst, t_parser *node)
 {
@@ -40,13 +40,13 @@ void create_node_arguments(t_parser **node, Token **tokens)
         perror("malloc failed");
         exit(EXIT_FAILURE);
     }
-    (*node)->arguments[0] = *tokens;
+    (*node)->arguments[0] = (*tokens)->expanded_value[0];
     (*tokens) = (*tokens)->next;
     i++;
     while (*tokens && !is_operator(*tokens) &&
            (*tokens)->type != TOKEN_COMMAND && (*tokens)->type != TOKEN_BUILT_IN)
            {
-        (*node)->arguments[i] = *tokens;
+        (*node)->arguments[i] = (*tokens)->expanded_value[i];
         (*tokens) = (*tokens)->next;
         i++;
     }

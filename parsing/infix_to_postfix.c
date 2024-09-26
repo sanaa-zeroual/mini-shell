@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../minishell.h"
 
 void push_back_stack(t_stack **src, t_stack **dest)
 {

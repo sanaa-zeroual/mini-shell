@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../minishell.h"
 
 char	*find_command_path(char **dir, char *command) // work
 {

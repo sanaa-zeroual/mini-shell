@@ -1,5 +1,5 @@
-#include "../mini.h"
-#include "../libftt/libft.h"
+#include "../../../minishell.h"
+#include "../../libftt/libft.h"
 
 t_envi	*search_env(t_envi *envi, char *name)
 {

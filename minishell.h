@@ -4,10 +4,16 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <stdio.h>
+// #include "parsing/gnl/get_next_line.h"
+#include "execution/libftt/libft.h"
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+#include <limits.h>
 #include <signal.h>
 #include <unistd.h>
 
@@ -82,7 +88,7 @@ typedef enum
 typedef struct parse
 {
 	Token		*token;
-	Token   	**arguments;
+	char		**arguments;
 	int         input_fd;
 	int         output_fd;
 	struct parse *next;
@@ -101,7 +107,7 @@ typedef struct s_ast
 typedef struct queue
 {
 	Token			*node;
-	Token			**arg;
+	char				**arg;
 	struct queue	*next;
 }					t_queue;
 
@@ -114,13 +120,13 @@ typedef struct stack
 			//**Tokenization**/
 Token	**tokenize(char *input);
 void	add_token(Token **tokens, TokenType type, const char *value);
-char	*handle_quote(char *str, char c);
+// char	*handle_quote(char *str, int c);
 // void	print_tokens(Token *tokens);
 
 			//**libft**/
-char	**ft_split(char *s, char c);
+// char	**ft_split(char *s, char c);
 char	*ft_strjoin(char const *s1, char const *s2);
-char	*ft_strtrim(char *s1, char *set);
+// char	*ft_strtrim(char *s1, char *set);
 
 		    //pipex_utils
 char	*get_executable(char *command);
@@ -163,6 +169,77 @@ void handle_ctrl_d();
 
 Token *get_last_token(Token *token);
 
-void print_queue(t_queue *queue);
-void execute_ast(t_ast *root, char **envp);
+// void print_queue(t_queue *queue);
+int	ft_counter(char *str, char c);
+int ft_is_separator(char c);
+
+
+///////////////////// execution /////////////////////////
+
+typedef struct s_env
+{
+	char					*name;
+	char					*vale;
+	struct s_env			*next;
+    struct s_env             *prv;
+}							t_envi;
+
+typedef struct  s_pipe
+{
+	int write_end;
+	int read_end;
+}						t_pipe;
+
+// typedef struct  s_exec
+// {
+//     char **args;
+//     char
+
+// }       t_exec;
+
+//exit 
+typedef struct s_shell
+{
+    int exit_status;
+    char **args;
+    int in_child;
+} t_shell;
+
+typedef struct s_mini
+{
+    t_envi *env;
+    t_shell *shell;
+    char **ptr;
+    char **arr;
+}t_mini;
+
+		//redirections
+
+int redir_fd_in(t_ast *cmd);
+void execute_command(t_ast *cmd);
+int redir_fd_out(t_ast *cmd);
+
+		//pipeline
+
+pid_t right_pipe(t_ast *cmd, t_pipe *pipe_fds);
+pid_t left_pipe(t_ast *cmd, t_pipe *pipe_fds);
+void execute_pipeline(t_ast *cmd, t_pipe *pipe_fds);
+
+		//builtins
+int builtins(char **av, t_mini *box, int val);
+int is_builtin(char *cmd);
+void ft_putstr_fd(char *str, int fd);
+int	ft_cd(char **ptr, t_envi *envi);
+void	update_env(t_envi *envi);
+t_envi	*search_env(t_envi *envi, char *name);
+int is_n_option(char *arg);
+int first_non_option(char **args);
+int ft_echo(char **args);
+int	ft_unset(char **ptr, t_mini *box);
+void ft_remove(t_mini *box);
+int	f__plus(char *r);
+int	ft_export(char **ptr, t_envi *env);
+int  ft_pwd(char **av);
+int	ft_exit(t_shell *shell);
+int ft_env(t_envi *env);
 #endif

@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../minishell.h"
 
 void print_ast(t_ast *ast, int depth)
 {
@@ -54,32 +54,69 @@ t_ast *pop_ast_stack(t_ast **ast_stack)
 }
 
 
-int	main()
-{
-    char	    *input;
-    Token	    **tokens;
-    t_queue     *queue;
-    t_ast       *ast;
-    int         errno;
-    t_parser    *parsed;
+// int	main()
+// {
+//     char	    *input;
+//     Token	    **tokens;
+//     t_queue     *queue;
+//     t_ast       *ast;
+//     t_parser    *parsed;
 
-	tokens = NULL;
-	while (1)
-	{
-		handle_signal();
-		input = readline("Minishell$ ");
-		if (!input)
-			break ;
-        add_history(input);
-		tokens = tokenize(input);
-        errno = check_syntax_errors(*tokens);
-        if (errno)
-            main();
-        // expand (*tokens);
-        parsed = analyse_tokens(tokens);
-        queue = generate_postfix(parsed);
-		ast = generate_ast_from_postfix(queue);
-        print_ast(ast,5);
-	}
-	return (0);
-}
+// 	tokens = NULL;
+// 	while (1)
+// 	{
+// 		handle_signal();
+// 		input = readline("Minishell$ ");
+// 		if (!input)
+// 			break ;
+//         if (!strlen(input))
+//             main();
+//         add_history(input);
+// 		tokens = tokenize(input);
+//         expand(*tokens);
+// 		parsed = analyse_tokens(tokens);
+// 		queue = generate_postfix(parsed);
+// 		ast = generate_ast_from_postfix(queue);
+// 		// print_ast(ast,5);
+// 	}
+// 	return (0);
+// }
+
+
+// execute_ast(ast, envp);
+
+// main();
+// exit(1);
+
+
+
+
+
+        // while(*tokens)
+        // {
+        //     printf("value = %s\n", (*tokens)->value);
+        //     (*tokens) = (*tokens)->next;
+        // }
+        // exit(1);
+
+        // int	i;
+        // while(*tokens)
+        // {
+        //     i = 0;
+        //     printf("=========value = %s\n", (*tokens)->value);
+		// 	if ((*tokens)->expanded_value)
+		// 	{
+		// 		while ((*tokens)->expanded_value[i] != NULL)
+		// 		{
+		// 			printf("expanded_value = '%s'\n", (*tokens)->expanded_value[i]);
+		// 			i++;
+		// 		}
+		// 	}
+        //     (*tokens) = (*tokens)->next;
+        // }
+        // exit(1);
+
+		
+        // errno = check_syntax_errors(*tokens);
+        // if (errno)
+        //     main();

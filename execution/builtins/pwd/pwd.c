@@ -1,11 +1,13 @@
-#include "mini.h"
-#include "../libftt/libft.h"
+#include "../../../minishell.h"
+#include "../../libftt/libft.h"
 
 int ft_pwd(char **av)
 {
     char *pwd;
     t_envi env;
 
+    (void)av;
+    (void)env;
     char buff[1024];
     pwd = getcwd(buff, sizeof(buff));
     if(!pwd)

@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../minishell.h"
 
 Token *create_token(char *type, char *value)
 {

@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../minishell.h"
 
 t_ast *create_ast_node(t_queue *data, t_ast *node)
 {
@@ -21,7 +21,7 @@ t_ast *create_ast_node(t_queue *data, t_ast *node)
     new_node->data->output_fd = STDOUT_FILENO;
     if (node)
     {
-        if (data->node->type == TOKEN_REDIR_OUT ||data->node->type == TOKEN_REDIR_APPEND)
+        if (data->node->type == TOKEN_REDIR_OUT || data->node->type == TOKEN_REDIR_APPEND)
         {
             new_node->data->output_fd = open(node->data->token->value, O_CREAT | O_RDWR, 0777);
             if (new_node->data->output_fd == -1)

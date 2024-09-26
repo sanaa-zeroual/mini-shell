@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../minishell.h"
 
 t_stack *new_stack_node(t_parser *token)
 {

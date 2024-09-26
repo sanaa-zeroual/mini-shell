@@ -1,4 +1,4 @@
-# include "minishell.h"
+#include "../minishell.h"
 
 Token *create_token(TokenType type, const char *value)
 {
@@ -82,6 +82,37 @@ char *handle_Parentheses(char *str, char c)
     return word;
 }
 
+// char *handle_quote(char *str)
+// {
+//     int     i;
+//     char    *word;
+
+//     i = 0;
+//     while (str[i])
+//     {
+//         if (str[++i] == '"')
+//         {
+//             while (str[i] && str[i] != '"')
+//                 i++;
+//             if (str[i] == '"')
+//                 i++;
+//         }
+//         else if (str[++i] == '\'')
+//         {
+//             while (str[i] && str[i] != '\'')
+//                 i++;
+//             if (str[i] == '\'')
+//                 i++; 
+//         }
+//         else
+//         {
+//             while (str[i] && !ft_is_separator(str[i]))
+//                 i++;
+//         }
+//     }
+//     word = strndup(str, i);
+//     return word;
+// }
 char *handle_quote(char *str, char c)
 {
 	int		i;
@@ -210,7 +241,7 @@ char *char_to_string(char c, char c2)
     return string;
 }
 
-int ft_strchr(char *string, char *delimiteur, int *l)
+int ft_strschr(char *string, char *delimiteur, int *l)
 {
     int		i;
     char	**splited;
@@ -271,36 +302,64 @@ char *heredoc_token(char *input, int l)
 	return (full_token);
 }
 
-char *handle_heredoc(char *input, int *n)
-{
-    int		i;
-    int		k = 0;
-    char	*delimiter;
-    int		l = 0;
+// char *handle_heredoc(char *input, int *n)
+// {
+//     int		i;
+//     int		k = 0;
+//     char	*delimiter;
+//     int		l = 0;
 
-    *n = 0;
-    i = 0;
-    while (input[i] && (input[i] == '<' || input[i] == ' ' || input[i] == '\t'))
-        i++;
-    if (ft_is_separator(input[i]))
-    {
-        printf("Syntax Error.\n");
-        exit (1);
-    }
-    k = i;
-    while (input[k] != ' ' && input[k] != '\t' && input[k] != '\n')
-        k++;
-    delimiter = strndup(input + i , k - i);
-    l = k + i;
-    if (!find_delimiter_in_lines(input + k + 1, delimiter, &l))
-	{
-        printf("Syntax Error.\n");
-        free(delimiter);
-        exit(1);
-    }
-    free(delimiter);
-    return heredoc_token(input, l);
-}
+//     *n = 0;
+//     i = 0;
+//     while (input[i] && (input[i] == '<' || input[i] == ' ' || input[i] == '\t'))
+//         i++;
+//     if (ft_is_separator(input[i]))
+//     {
+//         printf("Syntax Error.\n");
+//         exit (1);
+//     }
+//     k = i;
+//     while (input[k] != ' ' && input[k] != '\t' && input[k] != '\n')
+//         k++;
+//     delimiter = strndup(input + i , k - i);
+//     l = k + i;
+//     if (!find_delimiter_in_lines(input + k + 1, delimiter, &l))
+// 	{
+//         printf("Syntax Error.\n");
+//         free(delimiter);
+//         exit(1);
+//     }
+//     free(delimiter);
+//     return heredoc_token(input, l);
+// }
+
+// char *handle_heredoc(char *input, int *n) // until I find how it will be done
+// {
+//     int		i;
+//     int		k = 0;
+//     char	*delimiter;
+//     char    *buffer;
+//     char    *result;
+
+//     *n = 0;
+//     i = 0;
+//     buffer = strdup(" ");
+//     result = strdup("");
+//     while (input[i] && (input[i] == '<' || input[i] == ' ' || input[i] == '\t'))
+//         i++;
+//     k = i;
+//     while (input[k] != ' ' && input[k] != '\t' && input[k] != '\n')
+//         k++;
+//     delimiter = strndup(input + i , k - i);
+//     while (strncmp(buffer, delimiter, strlen(delimiter)))
+//     {
+//         result = ft_strjoin(result, buffer);
+//         write(0, "> ", 2);
+//         buffer = get_next_line(STDIN_FILENO);
+//     }
+//     *n = *n + strlen(result);
+//     return (result);
+// }
 
 char *handle_dollar(char *str)
 {
@@ -317,17 +376,15 @@ char *handle_dollar(char *str)
     return word;
 }
 
-int ft_strlen(char *str)
-{
-	int i;
+// int ft_strlen(char *str)
+// {
+// 	int i;
 
-	i = 0;
-	while (str[i])
-	{
-		i++;
-	}
-	return (i);
-}
+// 	i = 0;
+// 	while (str[i])
+// 		i++;
+// 	return (i);
+// }
 
 
 void handle_operators(char *input, Token **tokens, int *j, int *k)
@@ -406,12 +463,12 @@ Token **tokenize(char *input)
             i += strlen(word);
             free (word);
         }
-        else if (input[i] == '<' && input[i + 1] && input[i+1] == '<')
-        {
-            word = handle_heredoc(input + i, &k);
-            add_token(tokens, TOKEN_REDIR_HERE_DOC, word);
-            i += strlen(word);
-        }
+        // else if (input[i] == '<' && input[i + 1] && input[i+1] == '<')
+        // {
+        //     word = handle_heredoc(input + i, &k);
+        //     add_token(tokens, TOKEN_REDIR_HERE_DOC, word);
+        //     i += strlen(word);
+        // }
 		else if (input[i] == '>' || input[i] == '<' || input[i] == '|' ||
 			(input[i] == '>' && input[i + 1] && input[i + 1] == '>'))
 			    handle_operators(input + i, tokens, &i, &k);

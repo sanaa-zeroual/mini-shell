@@ -1,5 +1,5 @@
-#include "../mini.h"
-#include "../libftt/libft.h"
+#include "../../../minishell.h"
+#include "../../libftt/libft.h"
 
 
 void ft_putstr_fd(char *str, int fd)
@@ -52,13 +52,13 @@ int	ft_exit(t_shell *shell)
 	return (0);
 }
 
-int main(int argc, char *argv[])
-{
-    t_shell shell = {0, argv, 0};  
+// int main(int argc, char *argv[])
+// {
+//     t_shell shell = {0, argv, 0};  
 
-    int exit_code;
-    exit_code = ft_exit(&shell);
-         return shell.exit_status;
-    return 0;
-}
+//     int exit_code;
+//     exit_code = ft_exit(&shell);
+//          return shell.exit_status;
+//     return 0;
+// }
 

@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../minishell.h"
 
 #define SIGINT 2    // Ctrl+C
 #define SIGQUIT 3   // Ctrl+D
@@ -27,5 +27,6 @@ void handle_signal()
 {
     signal(SIGINT, handle_ctrl_c);
     signal(SIGTERM, handle_ctrl_d);
+    
 }
 

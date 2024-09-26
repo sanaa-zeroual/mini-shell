@@ -1,8 +1,8 @@
-#include "../mini.h"
-#include "../libftt/libft.h"
+#include "../../../minishell.h"
+#include "../../libftt/libft.h"
 
 
-int *ft_env(t_envi *env)
+int ft_env(t_envi *env)
 {
     t_envi *tmp = env;
     while(tmp)

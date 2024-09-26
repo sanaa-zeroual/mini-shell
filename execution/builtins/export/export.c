@@ -1,5 +1,5 @@
-#include "../mini.h"
-#include "../libftt/libft.h"
+#include "../../../minishell.h"
+#include "../../libftt/libft.h"
 
 void	swap_nodes(t_envi *a, t_envi *b)
 {

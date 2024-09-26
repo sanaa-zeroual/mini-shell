@@ -1,5 +1,4 @@
-#include "mini.h"
-#include "../minishell.h"
+#include "../../minishell.h"
 
 int count_arguments(char **arguments)
 {
@@ -74,7 +73,7 @@ char **get_command(t_ast *cmd)
     int i = 0;
     while (i < arg_count)
     {
-        arr[i] = ft_strdup(cmd->data->arguments[i]->value); 
+        arr[i] = ft_strdup(cmd->data->arguments[i]); 
         if (!arr[i])
         {
             perror("ft_strdup error");

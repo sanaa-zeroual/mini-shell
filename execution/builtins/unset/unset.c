@@ -1,5 +1,5 @@
-#include "../mini.h"
-#include "../libftt/libft.h"
+#include "../../../minishell.h"
+#include "../../libftt/libft.h"
 
 void ft_remove(t_mini *box)
 {
@@ -12,12 +12,12 @@ void ft_remove(t_mini *box)
 	{
 		curr= box->env;
 		prv = NULL;
-		while(curr && ft_strcmp(curr->name, av[i]) != 0)
+		while(curr && strcmp(curr->name, av[i]) != 0)
 		{
 			prv = curr;
 			curr = curr->next;
 		}
-		if(curr && ft_strcmp(curr->name, "_") != 0)
+		if(curr && strcmp(curr->name, "_") != 0)
 		{
 			if(prv)
 				prv->next = curr->next;
@@ -33,11 +33,6 @@ void ft_remove(t_mini *box)
 
 int	ft_unset(char **ptr, t_mini *box)
 {
-	t_envi	*current;
-	t_envi	*previous;
-
-	current = box->env = NULL;
-	previous = NULL;
 	if (ptr[1])
 		ft_remove(box);
 	else
