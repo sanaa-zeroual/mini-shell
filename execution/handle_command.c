@@ -32,7 +32,6 @@ char **convert_env_to_array(t_envi *env)
                 free(env_array);
                 return NULL;
             }
-            sprintf(env_array[i], "%s=%s", env->name, env->vale);
         }
         else
         {
