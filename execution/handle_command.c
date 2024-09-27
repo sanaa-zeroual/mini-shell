@@ -47,7 +47,6 @@ char **convert_env_to_array(t_envi *env)
                 free(env_array);
                 return NULL;
             }
-            sprintf(env_array[i], "%s=", env->name);
         }
         env = env->next;
         i++;
@@ -55,8 +54,6 @@ char **convert_env_to_array(t_envi *env)
     env_array[i] = NULL;
     return env_array;
 }
-
-
 
 int count_arguments(char **arguments)
 {
