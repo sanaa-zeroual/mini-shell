@@ -1,57 +1,42 @@
 #include "../minishell.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
-
-char **convert_env_to_array(t_envi *env)
+char **separate_env(t_envi *env)
 {
     int count = 0;
-    t_envi *temp = env;
-    while (temp)
+    t_envi *tmp = env;
+    while (tmp)
     {
         count++;
-        temp = temp->next;
+        tmp = tmp->next;
     }
-    char **env_array = malloc(sizeof(char *) * (count + 1));
-    if (!env_array)
+    char **the_env = malloc(sizeof(char *) * (count + 1));
+    if (!the_env)
     {
-        perror("malloc error");
+        perror("Error allocating memory");
         return NULL;
     }
     int i = 0;
     while (env)
     {
-        if (env->vale)
+        size_t name_len = strlen(env->name);
+        size_t value_len = strlen(env->vale);
+        the_env[i] = malloc(name_len + value_len + 2);
+        if (!the_env[i])
         {
-            env_array[i] = malloc(strlen(env->name) + strlen(env->vale) + 2);
-            if (!env_array[i])
-            {
-                perror("malloc error");
-                while (i > 0)
-                {
-                    free(env_array[--i]);
-                }
-                free(env_array);
-                return NULL;
-            }
+            perror("Error allocating memory for environment variable string");
+            return NULL;
         }
-        else
-        {
-            env_array[i] = malloc(strlen(env->name) + 2);
-            if (!env_array[i])
-            {
-                perror("malloc error");
-                while (i > 0)
-                {
-                    free(env_array[--i]);
-                }
-                free(env_array);
-                return NULL;
-            }
-        }
+        strcpy(the_env[i], env->name);
+        the_env[i][name_len] = '=';
+        strcpy(the_env[i] + name_len + 1, env->vale);
         env = env->next;
         i++;
     }
-    env_array[i] = NULL;
-    return env_array;
+    the_env[i] = NULL;
+    return the_env;
 }
 
 int count_arguments(char **arguments)
@@ -66,13 +51,13 @@ int count_arguments(char **arguments)
 
 char **get_path()
 {
-    char *path_env = getenv("PATH"); 
+    char *path_env = getenv("PATH");
     if (!path_env)
     {
         perror("PATH not found");
         return NULL;
     }
-    return ft_split(path_env, ':'); 
+    return ft_split(path_env, ':');
 }
 
 char **get_command(t_ast *cmd)
@@ -87,7 +72,7 @@ char **get_command(t_ast *cmd)
     int i = 0;
     while (i < arg_count)
     {
-        arr[i] = ft_strdup(cmd->data->arguments[i]); 
+        arr[i] = ft_strdup(cmd->data->arguments[i]);
         if (!arr[i])
         {
             perror("ft_strdup error");
@@ -100,25 +85,15 @@ char **get_command(t_ast *cmd)
     return arr;
 }
 
-void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds)
+void executing(t_ast *node)
 {
-    if (!node)
-        return;
-    if (node->type == PIPELINE)
-        execute_pipeline(node, pipe_fds);
-    else if (node->type == COMMAND)
+    t_mini *box = NULL;
+    if (node->type == COMMAND)
     {
         char **av = get_command(node);
         if (!av)
             return;
-
-        if (is_builtin(node->data->token->value)) 
-        {
-            int status = builtins(av, box);
-            free(av);
-            exit(status);
-        }
-        else
+        if (!is_builtin(node->data->token->value))
         {
             char **command_path = get_path();
             if (!command_path)
@@ -126,10 +101,11 @@ void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds)
                 free(av);
                 return;
             }
-            char **env_array = convert_env_to_array(box->env);
+            char **env_array = separate_env(box->env);
             if (!env_array)
             {
                 free(av);
+                free(command_path);
                 return;
             }
             if (node->data->input_fd != STDIN_FILENO)
@@ -142,7 +118,6 @@ void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds)
                 dup2(node->data->output_fd, STDOUT_FILENO);
                 close(node->data->output_fd);
             }
-
             int i = 0;
             char *full_path = NULL;
             while (command_path[i])
@@ -150,7 +125,6 @@ void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds)
                 char *temp = ft_strjoin(command_path[i], "/");
                 full_path = ft_strjoin(temp, av[0]);
                 free(temp);
-
                 if (access(full_path, X_OK) == 0) 
                 {
                     execve(full_path, av, env_array);
@@ -176,9 +150,25 @@ void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds)
                 i++;
             }
             free(env_array);
-
             exit(EXIT_FAILURE);
+        }
+        else
+        {
+            int status = builtins(av, box);
+            free(av);
+            exit(status);
         }
     }
 }
 
+void dfs_execute(t_ast *cmd)
+{
+    if (!cmd)
+        return;
+    if (cmd->type == PIPELINE)
+        execute_pipeline(cmd);
+    else if (cmd->type == REDERECTION_IN || cmd->type == REDERECTION_OUT)
+        execute_command(cmd);
+    else if (cmd->type == COMMAND)
+        executing(cmd);
+}

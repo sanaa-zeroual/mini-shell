@@ -50,9 +50,10 @@ int redir_fd_out(t_ast *cmd)
 
 void execute_command(t_ast *cmd)
 {
-    if (redir_fd_in(cmd) < 0) return;
-    if (redir_fd_out(cmd) < 0) return;
-
+    if (redir_fd_in(cmd) < 0)
+        return;
+    if (redir_fd_out(cmd) < 0) 
+        return;
     pid_t pid = fork();
     if (pid < 0) return;
 
@@ -68,7 +69,7 @@ void execute_command(t_ast *cmd)
             dup2(cmd->data->output_fd, STDOUT_FILENO);
             close(cmd->data->output_fd);
         }
-        executing(cmd, NULL, NULL);
+        executing(cmd);
         exit(0);
     } 
     else

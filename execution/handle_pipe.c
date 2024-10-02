@@ -17,7 +17,7 @@ pid_t left_pipe(t_ast *cmd, t_pipe *pipe_fds)
         }
         close(pipe_fds->read_end);
         close(pipe_fds->write_end);
-        executing(cmd, NULL, pipe_fds);
+        executing(cmd);
         exit(0);
     }
     return pipe_left; 
@@ -40,14 +40,15 @@ pid_t right_pipe(t_ast *cmd, t_pipe *pipe_fds)
         }
         close(pipe_fds->write_end);
         close(pipe_fds->read_end);
-        executing(cmd, NULL, pipe_fds);
+        executing(cmd);
         exit(0);
     }
     return pipe_right;
 }
 
-void execute_pipeline(t_ast *cmd, t_pipe *pipe_fds)
+void execute_pipeline(t_ast *cmd)
 {
+    t_pipe *pipe_fds = NULL; 
     pid_t left_pid = left_pipe(cmd->left, pipe_fds);
     pid_t right_pid = right_pipe(cmd->right, pipe_fds);
     close(pipe_fds->read_end);

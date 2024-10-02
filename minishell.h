@@ -223,7 +223,7 @@ int redir_fd_out(t_ast *cmd);
 
 pid_t right_pipe(t_ast *cmd, t_pipe *pipe_fds);
 pid_t left_pipe(t_ast *cmd, t_pipe *pipe_fds);
-void execute_pipeline(t_ast *cmd, t_pipe *pipe_fds);
+void execute_pipeline(t_ast *cmd);
 
 		//builtins
 		
@@ -240,13 +240,16 @@ int	ft_unset(char **ptr, t_mini *box);
 void ft_remove(t_mini *box);
 int	f__plus(char *r);
 int	ft_export(char **ptr, t_envi *env);
-int  ft_pwd(char **av);
+int ft_pwd( t_envi *env);
 int	ft_exit(t_shell *shell);
 int ft_env(t_envi *env);
 
 		//extenal command
+char **separate_env(t_envi *env);
 char **get_command(t_ast *cmd);
 char **get_path();
 int count_arguments(char **arguments);
-void executing(t_ast *node, t_mini *box, t_pipe *pipe_fds);
+void executing(t_ast *node);
+void dfs_execute(t_ast *cmd);
+void process_node(t_ast *cmd, t_pipe *pipe_fds);
 #endif

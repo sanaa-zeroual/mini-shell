@@ -24,8 +24,9 @@ int	main()
 		parsed = analyse_tokens(tokens);
 		queue = generate_postfix(parsed);
 		ast = generate_ast_from_postfix(queue);
-		executing(ast, NULL, NULL);
-		// print_ast(ast,5);
+
+		if(ast)
+			dfs_execute(ast);
 	}
 	return (0);
 }
