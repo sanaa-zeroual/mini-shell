@@ -8,13 +8,15 @@ int redir_fd_in(t_ast *cmd)
     {
         if (node->type == REDERECTION_IN)
         {
-            if (fd) close(fd);
+            if (fd)
+                close(fd);
             fd = open(node->data->token->value, O_RDONLY, 00644);
             if (fd < 0) return -1;
         }
         else if (node->type == PREC_REDIR_HERE_DOC)
         {
-            if (fd) close(fd);
+            if (fd)
+                close(fd);
             fd = node->data->input_fd;
         }
         node = node->right;
@@ -32,13 +34,15 @@ int redir_fd_out(t_ast *cmd)
        {
         if (node->type == REDERECTION_OUT)
         {
-            if (fd) close(fd);
+            if (fd)
+                close(fd);
             fd = open(node->data->token->value, O_WRONLY | O_CREAT | O_TRUNC, 00644);
             if (fd < 0) return -1;
         }
         else if (node->type == REDERECTION_APPEND)
         {
-            if (fd) close(fd);
+            if (fd)
+                close(fd);
             fd = open(node->data->token->value, O_WRONLY | O_CREAT | O_APPEND, 00644);
             if (fd < 0) return -1;
         }
