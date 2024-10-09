@@ -161,14 +161,4 @@ void executing(t_ast *node)
     }
 }
 
-void dfs_execute(t_ast *cmd)
-{
-    if (!cmd)
-        return;
-    if (cmd->type == PIPELINE)
-        execute_pipeline(cmd);
-    else if (cmd->type == REDERECTION_IN || cmd->type == REDERECTION_OUT)
-        execute_command(cmd);
-    else if (cmd->type == COMMAND)
-        executing(cmd);
-}
+
