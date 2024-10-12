@@ -7,7 +7,9 @@ int	main()
     t_queue     *queue;
     t_ast       *ast;
     t_parser    *parsed;
-
+	t_mini *box;
+	box = (t_mini *)malloc(sizeof(t_mini));
+	box->env = int_env();
 	(void)ast;
 	tokens = NULL;
 	while (1)
@@ -24,9 +26,7 @@ int	main()
 		parsed = analyse_tokens(tokens);
 		queue = generate_postfix(parsed);
 		ast = generate_ast_from_postfix(queue);
-
-		if(ast)
-			dfs_execute(ast);
+		postorder_execution(ast, box);
 	}
 	return (0);
 }

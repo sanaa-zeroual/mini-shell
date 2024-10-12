@@ -45,6 +45,7 @@ pid_t right_pipe(t_ast *cmd, t_pipe *pipe_fds)
     }
     return pipe_right;
 }
+   
 int create_pipe(t_pipe *pipe_fds)
 {
     if (pipe((int[]){pipe_fds->read_end, pipe_fds->write_end}) < 0)
@@ -58,7 +59,7 @@ int create_pipe(t_pipe *pipe_fds)
 void execute_pipeline(t_ast *cmd)
 {
     t_pipe *pipe_fds = malloc(sizeof(t_pipe));
-    if(create_pipe(&pipe_fds) < 0)
+    if(create_pipe(pipe_fds) < 0)
         return;
     pid_t left_pid = left_pipe(cmd->left, pipe_fds);
     pid_t right_pid = right_pipe(cmd->right, pipe_fds);

@@ -202,7 +202,6 @@ typedef struct s_shell
 {
     int exit_status;
     char **args;
-    int in_child;
 } t_shell;
 
 typedef struct s_mini
@@ -249,7 +248,8 @@ char **separate_env(t_envi *env);
 char **get_command(t_ast *cmd);
 char **get_path();
 int count_arguments(char **arguments);
-void executing(t_ast *node);
-void dfs_execute(t_ast *cmd);
+void executing(t_ast *node, t_mini *box);
 void process_node(t_ast *cmd, t_pipe *pipe_fds);
+int handle_redirections(t_ast *cmd);
+void postorder_execution(t_ast *root, t_mini *box);
 #endif

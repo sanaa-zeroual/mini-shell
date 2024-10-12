@@ -27,6 +27,8 @@ SRCS =  mnsh.c \
         execution/handle_command.c \
         execution/handle_pipe.c \
         execution/handle.redirection.c \
+        execution/utils.c \
+        execution/postorde.c \
         $(wildcard libft/*.c) \
         $(wildcard execution/libftt/*.c)
 
