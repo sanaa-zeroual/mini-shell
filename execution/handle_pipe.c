@@ -1,6 +1,6 @@
 #include "../minishell.h"
 
-pid_t left_pipe(t_ast *cmd, t_pipe *pipe_fds)
+pid_t left_pipe(t_ast *cmd, t_pipe *pipe_fds, t_mini *box)
 {
     pid_t pipe_left = fork();
     if (pipe_left < 0)
@@ -17,13 +17,13 @@ pid_t left_pipe(t_ast *cmd, t_pipe *pipe_fds)
         }
         close(pipe_fds->read_end);
         close(pipe_fds->write_end);
-        executing(cmd);
+        executing(cmd, box);
         exit(0);
     }
     return pipe_left; 
 }
 
-pid_t right_pipe(t_ast *cmd, t_pipe *pipe_fds)
+pid_t right_pipe(t_ast *cmd, t_pipe *pipe_fds, t_mini *box)
 {
     pid_t pipe_right = fork();
     if (pipe_right < 0)
@@ -40,7 +40,7 @@ pid_t right_pipe(t_ast *cmd, t_pipe *pipe_fds)
         }
         close(pipe_fds->write_end);
         close(pipe_fds->read_end);
-        executing(cmd);
+        executing(cmd, box);
         exit(0);
     }
     return pipe_right;
@@ -48,21 +48,25 @@ pid_t right_pipe(t_ast *cmd, t_pipe *pipe_fds)
    
 int create_pipe(t_pipe *pipe_fds)
 {
-    if (pipe((int[]){pipe_fds->read_end, pipe_fds->write_end}) < 0)
+    int fds[2];
+    if (pipe(fds) < 0)
     {
         perror("pipe error");
         return -1;
     }
+    pipe_fds->read_end = fds[0];
+    pipe_fds->write_end = fds[1];
     return 0;
 }
 
-void execute_pipeline(t_ast *cmd)
+
+void execute_pipeline(t_ast *cmd, t_mini *box)
 {
     t_pipe *pipe_fds = malloc(sizeof(t_pipe));
     if(create_pipe(pipe_fds) < 0)
         return;
-    pid_t left_pid = left_pipe(cmd->left, pipe_fds);
-    pid_t right_pid = right_pipe(cmd->right, pipe_fds);
+    pid_t left_pid = left_pipe(cmd->left, pipe_fds, box);
+    pid_t right_pid = right_pipe(cmd->right, pipe_fds, box);
     close(pipe_fds->read_end);
     close(pipe_fds->write_end);
     waitpid(left_pid, NULL, 0);

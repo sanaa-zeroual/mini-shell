@@ -26,6 +26,8 @@ int first_non_option(char **args)
 
 int ft_echo(char **args)
 {
+    if(!args[1])
+        return 0;
     int i = first_non_option(args);
 
     while (args && args[i])

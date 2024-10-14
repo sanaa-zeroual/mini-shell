@@ -53,7 +53,6 @@ int redir_fd_in(t_ast *cmd)
     return 0;
 }
 
-
 int redir_fd_out(t_ast *cmd)
 {
     int fd = 0;
@@ -159,10 +158,8 @@ int redir_fd_out(t_ast *cmd)
 // 	return (*ret = '\0', free(s), save);
 // }
 
-void execute_command(t_ast *cmd)
+void execute_command(t_ast *cmd, t_mini *box)
 {
-    // if (handle_redirections(cmd) < 0)
-    //     return;
     pid_t pid = fork();
     if (pid < 0)
         return;
@@ -178,7 +175,7 @@ void execute_command(t_ast *cmd)
             dup2(cmd->data->output_fd, STDOUT_FILENO);
             close(cmd->data->output_fd);
         }
-        executing(cmd);
+        executing(cmd, box);
         exit(0);
     } 
     else
@@ -190,5 +187,4 @@ void execute_command(t_ast *cmd)
            close(cmd->data->output_fd);
     }
 }
-
 

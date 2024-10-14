@@ -7,7 +7,15 @@ void executing(t_ast *node, t_mini *box)
         char **av = get_command(node);
         if (!av)
             return;
-        if (!is_builtin(node->data->token->value))
+        if(is_builtin(node->data->token->value))
+        {
+            printf("%s\n", av[0]);
+            printf("%s", av[1]);
+            int status = builtins(av, box);
+            free(av);
+            exit(status);
+        }
+        else
         {
             char **command_path = get_path();
             if (!command_path)
@@ -37,6 +45,8 @@ void executing(t_ast *node, t_mini *box)
             while (command_path[i])
             {
                 char *temp = ft_strjoin(command_path[i], "/");
+                if(!temp)
+                    return ;
                 full_path = ft_strjoin(temp, av[0]);
                 free(temp);
                 if (access(full_path, X_OK) == 0) 
@@ -65,12 +75,6 @@ void executing(t_ast *node, t_mini *box)
             }
             free(env_array);
             exit(EXIT_FAILURE);
-        }
-        else
-        {
-            int status = builtins(av, box);
-            free(av);
-            exit(status);
         }
     }
 }

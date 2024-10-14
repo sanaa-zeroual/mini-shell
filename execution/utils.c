@@ -70,6 +70,7 @@ char **get_command(t_ast *cmd)
     while (i < arg_count)
     {
         arr[i] = ft_strdup(cmd->data->arguments[i]);
+        // printf("%s", )
         if (!arr[i])
         {
             perror("ft_strdup error");
