@@ -4,15 +4,18 @@ void executing(t_ast *node, t_mini *box)
 {
     if (node->type == COMMAND)
     {
-        char **av = get_command(node);
-        if (!av)
+        t_parser *av = node->data;
+        if (!av->arguments)
             return;
+        int j = 0;
+        while(av->arguments[j])
+        {
+            printf("%s", av->arguments[j]);
+            j++;
+        }
         if(is_builtin(node->data->token->value))
         {
-            printf("%s\n", av[0]);
-            printf("%s", av[1]);
-            int status = builtins(av, box);
-            free(av);
+            int status = builtins(av->arguments, box);
             exit(status);
         }
         else
@@ -20,13 +23,13 @@ void executing(t_ast *node, t_mini *box)
             char **command_path = get_path();
             if (!command_path)
             {
-                free(av);
+                free(av->arguments);
                 return;
             }
             char **env_array = separate_env(box->env);
             if (!env_array)
             {
-                free(av);
+                free(av->arguments);
                 free(command_path);
                 return;
             }
@@ -47,11 +50,11 @@ void executing(t_ast *node, t_mini *box)
                 char *temp = ft_strjoin(command_path[i], "/");
                 if(!temp)
                     return ;
-                full_path = ft_strjoin(temp, av[0]);
+                full_path = ft_strjoin(temp, av->arguments[0]);
                 free(temp);
                 if (access(full_path, X_OK) == 0) 
                 {
-                    execve(full_path, av, env_array);
+                    execve(full_path, av->arguments, env_array);
                     perror("execve error");
                     exit(EXIT_FAILURE); 
                 }
@@ -59,7 +62,7 @@ void executing(t_ast *node, t_mini *box)
                 i++;
             }
             perror("command not found");
-            free(av);
+            free(av->arguments);
             i = 0;
             while (command_path[i])
             {
@@ -78,4 +81,3 @@ void executing(t_ast *node, t_mini *box)
         }
     }
 }
-
