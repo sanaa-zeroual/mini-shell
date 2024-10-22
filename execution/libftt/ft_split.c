@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: szeroual <szeroual@student.42.fr>          +#+  +:+       +#+        */
+/*   By: shebaz <shebaz@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 19:09:51 by szeroual          #+#    #+#             */
-/*   Updated: 2023/12/08 16:30:23 by szeroual         ###   ########.fr       */
+/*   Updated: 2024/10/20 03:40:42 by shebaz           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,9 +87,7 @@ char	**ft_split(char const *s, char c)
 {
 	char	**ar;
 	int		wc;
-	int		i;
 
-	i = 0;
 	if (!s)
 		return (NULL);
 	wc = separate_string(s, c);

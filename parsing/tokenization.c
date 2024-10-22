@@ -1,5 +1,46 @@
 #include "../minishell.h"
 
+
+void free_token(Token *token)
+{
+    int i;
+
+    if (token)
+    {
+        printf("yes\n");
+        while(token)
+        {
+            if (token->value)
+                free(token->value);
+            if (token->expanded_value)
+            {
+                i = 0;
+                while (token->expanded_value[i])
+                {
+                    free(token->expanded_value[i]);
+                    i++;
+                }
+                free(token->expanded_value);
+            }
+            token = token->next;
+        }
+    }
+}
+// void free_tokens(Token *tokens)
+// {
+//     Token *current;
+//     Token *next;
+
+// 	current = tokens;
+//     while (current)
+// 	{
+//         next = current->next;
+//         free(current->value);
+//         free(current);
+//         current = next;
+// 	}
+// }
+
 Token *create_token(TokenType type, const char *value)
 {
     Token *token;
@@ -15,39 +56,25 @@ Token *create_token(TokenType type, const char *value)
     token->next = NULL;
     return token;
 }
-
 void add_token(Token **tokens, TokenType type, const char *value)
 {
 	Token	*new_node;
 	Token	*ptr;
 
+    ptr = *tokens;
 	new_node = create_token(type, value);
     if (!(*tokens))
         *tokens = new_node;
     else
 	{
-        ptr = *tokens;
         while (ptr->next)
-            ptr = ptr->next;
+        	ptr = ptr->next;
         new_node->previous = ptr;
         ptr->next = new_node;
     }
 }
 
-void free_tokens(Token *tokens)
-{
-    Token *current;
-    Token *next;
-
-	current = tokens;
-    while (current)
-	{
-        next = current->next;
-        free(current->value);
-        free(current);
-        current = next;
-	}
-}
+	// free_tokens(new_node);
 
 int ft_is_separator(char c)
 {
@@ -82,57 +109,31 @@ char *handle_Parentheses(char *str, char c)
     return word;
 }
 
-// char *handle_quote(char *str)
-// {
-//     int     i;
-//     char    *word;
-
-//     i = 0;
-//     while (str[i])
-//     {
-//         if (str[++i] == '"')
-//         {
-//             while (str[i] && str[i] != '"')
-//                 i++;
-//             if (str[i] == '"')
-//                 i++;
-//         }
-//         else if (str[++i] == '\'')
-//         {
-//             while (str[i] && str[i] != '\'')
-//                 i++;
-//             if (str[i] == '\'')
-//                 i++; 
-//         }
-//         else
-//         {
-//             while (str[i] && !ft_is_separator(str[i]))
-//                 i++;
-//         }
-//     }
-//     word = strndup(str, i);
-//     return word;
-// }
-char *handle_quote(char *str, char c)
+char *handle_quote(char *str)
 {
-	int		i;
+    int		i;
+    char    c;
+    int		j;
     char	*word;
 
-	i = 1;
-	if (strchr(str + 1, c))
-	{
-		while (str[i] && str[i] != c)
-			i++;
-		while (!ft_is_separator(str[i]))
-			i++;
-		word = strndup(str, i + 1);
-	}
-	else
-	{
-		while (!ft_is_separator(str[i]))
-			i++;
-		word = strndup(str, i + 1);
-	}
+    i = 0;
+    j = 0;
+    word = malloc(strlen(str) + 1);
+    c = str[i];
+    while (str[i] && !ft_is_separator(str[i]))
+    {
+        if (str[i] == c)
+        {
+            word[j++] = str[i++];
+            while (str[i] && str[i] != c)
+                word[j++] = str[i++];
+            if (str[i] == c)
+                word[j++] = str[i++];
+        }
+        else
+            word[j++] = str[i++];
+    }
+    word[j] = '\0';
     return word;
 }
 
@@ -146,6 +147,9 @@ int built_in_checker(const char *str)
 
 int get_token_type(const char *token, char c)
 {
+	char *path;
+
+	path = get_executable((char *)token);
     if (c)
     {
         if (c == '"')
@@ -154,8 +158,8 @@ int get_token_type(const char *token, char c)
     }
     if (built_in_checker(token))
         return TOKEN_BUILT_IN;
-    if (get_executable((char *)token))
-        return TOKEN_COMMAND;
+    if (path)
+        return (free(path), TOKEN_COMMAND);
     if (!strcmp(token, "~"))
         return TOKEN_TILDLE;
     if (!strcmp(token, "<<"))
@@ -333,33 +337,40 @@ char *heredoc_token(char *input, int l)
 //     return heredoc_token(input, l);
 // }
 
-// char *handle_heredoc(char *input, int *n) // until I find how it will be done
-// {
-//     int		i;
-//     int		k = 0;
-//     char	*delimiter;
-//     char    *buffer;
-//     char    *result;
+char *handle_heredoc(char *input, int *n) // until I find how it will be done
+{
+    int		i;
+    int		k;
+    char	*delimiter;
+    char	*buffer;
+    char	*result;
 
-//     *n = 0;
-//     i = 0;
-//     buffer = strdup(" ");
-//     result = strdup("");
-//     while (input[i] && (input[i] == '<' || input[i] == ' ' || input[i] == '\t'))
-//         i++;
-//     k = i;
-//     while (input[k] != ' ' && input[k] != '\t' && input[k] != '\n')
-//         k++;
-//     delimiter = strndup(input + i , k - i);
-//     while (strncmp(buffer, delimiter, strlen(delimiter)))
-//     {
-//         result = ft_strjoin(result, buffer);
-//         write(0, "> ", 2);
-//         buffer = get_next_line(STDIN_FILENO);
-//     }
-//     *n = *n + strlen(result);
-//     return (result);
-// }
+    *n = 0;
+    i = 0;
+    buffer = strdup(" ");
+    result = strdup("");
+    while (input[i] && (input[i] == '<' || input[i] == ' ' || input[i] == '\t'))
+        i++;
+    k = i;
+    while (input[k] != ' ' && input[k] != '\t' && input[k] != '\n')
+        k++;
+    delimiter = strndup(input + i , k - i);
+    result = ft_strjoin(result , delimiter);
+    k = i + strlen(delimiter);
+	while (input[k] != '\n')
+	{
+		result = ft_strjoin(result , char_to_string(input[i] , 0));
+		k++;
+	}
+	while (strncmp(buffer, delimiter, strlen(delimiter)))
+	{
+		result = ft_strjoin(result, buffer);
+		write(0, "> ", 2);
+		buffer = get_next_line(STDIN_FILENO);
+    	*n = *n + strlen(result);
+	}
+	return (result);
+}
 
 char *handle_dollar(char *str)
 {
@@ -376,32 +387,30 @@ char *handle_dollar(char *str)
     return word;
 }
 
-// int ft_strlen(char *str)
-// {
-// 	int i;
-
-// 	i = 0;
-// 	while (str[i])
-// 		i++;
-// 	return (i);
-// }
-
-
 void handle_operators(char *input, Token **tokens, int *j, int *k)
 {
-	int i;
+    char	*str1;
+    char	*str2;
+	int		i;
 
 	i = 0;
+	str2 = NULL;
+	str1 = char_to_string(input[i], 0);
 	if(input[i] == '>' || input[i] == '<' || input[i] == '|')
 	{
-		add_token(tokens, get_token_type(char_to_string(input[i], 0), 0), char_to_string(input[i], 0));
+		add_token(tokens, get_token_type(str1, 0), str1);
         (*j)++;
     }
     else if (input[i] == '>' && input[i + 1] && input[i + 1] == '>')
 	{
-		add_token(tokens, get_token_type(char_to_string(input[i], 0), 0), char_to_string(input[i], 1));
+		str2 = char_to_string(input[i], 1);
+		add_token(tokens, get_token_type(str1, 0), str2);
         (*j) +=2;
 	}
+	if(str1)
+		free(str1);
+	if (str2)
+		free(str2);
     *k = 0;
 }
 
@@ -417,7 +426,7 @@ void handle_word(char *input, Token **tokens, int *j, int *k)
     {
         if (input[i] == '"' || input[i]== '\'')
         {
-            str = handle_quote(input + i, input[i]);
+            str = handle_quote(input + i);
             i += strlen(str);
         }
         i++;
@@ -458,17 +467,18 @@ Token **tokenize(char *input)
             i++;
         else if ((input[i] == '\\' && (input[i + 1] == '"' || input[i] == '\''))||(input[i] == '"' || input[i] == '\''))
         {
-            word = handle_quote(input + i, input[i]);
+            word = handle_quote(input + i);
             add_token(tokens, get_token_type(word, input[i]), word);
             i += strlen(word);
-            free (word);
+            free(word);
         }
-        // else if (input[i] == '<' && input[i + 1] && input[i+1] == '<')
-        // {
-        //     word = handle_heredoc(input + i, &k);
-        //     add_token(tokens, TOKEN_REDIR_HERE_DOC, word);
-        //     i += strlen(word);
-        // }
+        else if (input[i] == '<' && input[i + 1] && input[i+1] == '<')
+        {
+            word = handle_heredoc(input + i, &k);
+            add_token(tokens, TOKEN_REDIR_HERE_DOC, word);
+            i += strlen(word);
+            free(word);
+        }
 		else if (input[i] == '>' || input[i] == '<' || input[i] == '|' ||
 			(input[i] == '>' && input[i + 1] && input[i + 1] == '>'))
 			    handle_operators(input + i, tokens, &i, &k);

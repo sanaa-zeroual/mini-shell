@@ -17,11 +17,17 @@ void push_back(t_parser **lst, t_parser *node)
 int nbr_argument(Token *tokens)
 {
     int nbr;
+    int	i;
 
     nbr = 0;
-    while(tokens && !is_operator(tokens))
+    while (tokens && !is_operator(tokens))
     {
-        nbr++;
+    	i = 0;
+        while (tokens->expanded_value[i])
+        {
+            i++;
+            nbr++;
+        }
         tokens = tokens->next;
     }
     return (nbr);
@@ -30,6 +36,7 @@ int nbr_argument(Token *tokens)
 void create_node_arguments(t_parser **node, Token **tokens)
 {
     int i;
+	int j;
     int num_args;
 
     i = 0;
@@ -46,13 +53,44 @@ void create_node_arguments(t_parser **node, Token **tokens)
     while (*tokens && !is_operator(*tokens) &&
            (*tokens)->type != TOKEN_COMMAND && (*tokens)->type != TOKEN_BUILT_IN)
            {
-        (*node)->arguments[i] = (*tokens)->expanded_value[i];
-        (*tokens) = (*tokens)->next;
-        i++;
-    }
+				j = 0;
+				while ((*tokens)->expanded_value[j])
+				{
+					(*node)->arguments[i] = (*tokens)->expanded_value[j];
+					i++;
+					j++;
+				}
+				(*tokens) = (*tokens)->next;
+    		}
     (*node)->arguments[i] = NULL;
 }
+void free_tokens(Token *tokens)
+{
 
+    Token *tmp;
+    while (tokens)
+    {
+        tmp = tokens;
+        tokens = tokens->next;
+        
+        // Free the `value` (assuming it's dynamically allocated)
+        if (tmp->value)
+            free(tmp->value);
+
+        // Free the `expanded_value` array (if not NULL)
+        if (tmp->expanded_value)
+        {
+            for (int i = 0; tmp->expanded_value[i]; i++)
+            {
+                free(tmp->expanded_value[i]);  // Free each string in the array
+            }
+            free(tmp->expanded_value);  // Free the array itself
+        }
+
+        // Free the token itself
+        free(tmp);
+    }
+}
 t_parser *analyse_tokens(Token **tokens)
 {
     t_parser *new;
@@ -73,10 +111,12 @@ t_parser *analyse_tokens(Token **tokens)
         node->arguments = NULL;
         if ((*tokens)->type == TOKEN_COMMAND || (*tokens)->type == TOKEN_BUILT_IN)
             create_node_arguments(&node, tokens);
-        else
+		else if (!is_operator(*tokens))
+            create_node_arguments(&node, tokens);
+		else
             (*tokens) = (*tokens)->next;
         push_back(&new, node);
     }
-    free(tokens);
+    // free_tokens(*tokens);
     return new;
 }

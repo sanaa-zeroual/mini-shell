@@ -4,7 +4,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <stdio.h>
-// #include "parsing/gnl/get_next_line.h"
+#include "parsing/gnl/get_next_line.h"
 #include "execution/libftt/libft.h"
 #include <stdlib.h>
 #include <fcntl.h>
@@ -120,7 +120,8 @@ typedef struct stack
 			//**Tokenization**/
 Token	**tokenize(char *input);
 void	add_token(Token **tokens, TokenType type, const char *value);
-// char	*handle_quote(char *str, int c);
+char *handle_quote(char *str);
+
 // void	print_tokens(Token *tokens);
 
 			//**libft**/
@@ -172,6 +173,7 @@ Token *get_last_token(Token *token);
 // void print_queue(t_queue *queue);
 int	ft_counter(char *str, char c);
 int ft_is_separator(char c);
+void print_ast(t_ast *ast, int depth);
 
 
 ///////////////////// execution /////////////////////////
@@ -215,7 +217,6 @@ typedef struct s_mini
 		//redirections
 
 int redir_fd_in(t_ast *cmd);
-// void execute_command(t_ast *cmd);
 int redir_fd_out(t_ast *cmd);
 
 		//pipeline
@@ -249,9 +250,18 @@ char **get_command(t_ast *cmd);
 char **get_path();
 int count_arguments(char **arguments);
 void executing(t_ast *node, t_mini *box);
-void process_node(t_ast *cmd, t_pipe *pipe_fds);
-int handle_redirections(t_ast *cmd);
-void postorder_execution(t_ast *root, t_mini *box);
-void postorder_algo(t_ast *cmd, t_mini *box);
-int	handle_heredoc(char *delim, int flg);
+void algo_execution(t_ast *cmd, t_mini *box);
+int handle_redir(t_ast *root, t_mini *box);
+int manage_io(t_ast *root);
+int handle_hd(char *delim, int expand, t_mini *box);
+char *expand_doc(char *s, t_mini *box);
+ssize_t calc_len(char *s, t_mini *box);
+void exec_cmd(t_ast *cmd, t_mini *box);
+int rfd_out(t_ast *cmd);
+char *expand_var(char *s, ssize_t *i, t_mini *box);
+int rfd_in(t_ast *cmd);
+void algo_execution(t_ast *cmd, t_mini *box);
+int is_identifier(int c);
+int is_identifier(int c);
+void exec_command_with_redirection(t_ast *cmd);
 #endif

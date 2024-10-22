@@ -3,6 +3,7 @@
 void print_ast(t_ast *ast, int depth)
 {
     int i;
+    int j;
 
     i = 0;
     if (ast == NULL)
@@ -13,7 +14,18 @@ void print_ast(t_ast *ast, int depth)
         i++;
     }
     if (ast && ast->data->token)
-        printf("Token: %s (Type: %d)\n", ast->data->token->value, ast->data->token->type);
+    {
+        j = 0;
+        printf ("Token: %s (Type: %d)\n", ast->data->token->value, ast->data->token->type);
+        if(ast->data->arguments)
+        {
+            while (ast->data->arguments[j])
+            {
+                printf("arg[%d] = %s\n",j, ast->data->arguments[j]);
+                j++;
+            }
+        }
+    }
     else
         printf("NULL Token\n");
     print_ast(ast->left, depth + 1);

@@ -54,7 +54,6 @@ int	main(int argc, char **argv, char **envp)
     t_ast       *ast;
     t_parser    *parsed;
     t_mini *box = initialize_mini(envp);
-    (void)ast;
     tokens = NULL;
     while (1)
     {
@@ -70,7 +69,7 @@ int	main(int argc, char **argv, char **envp)
         parsed = analyse_tokens(tokens);
         queue = generate_postfix(parsed);
         ast = generate_ast_from_postfix(queue);
-        postorder_execution(ast, box);
+        algo_execution(ast, box);
     }
     return (0);
 }
