@@ -1,7 +1,6 @@
 #include "../minishell.h"
 
 
-
 void algo_execution(t_ast *cmd, t_mini *box)
 {
     if (!cmd)
