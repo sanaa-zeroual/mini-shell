@@ -1,5 +1,5 @@
 #include "../../../minishell.h"
-#include "../../libftt/libft.h"
+#include "../../../externel_folder/libftt/libft.h"
 
 void	swap_nodes(t_envi *a, t_envi *b)
 {
@@ -196,7 +196,7 @@ t_envi *search_env(t_envi *env, char *name)
 {
 	while (env)
 	{
-		if (strcmp(env->name, name) == 0)
+		if (ft_strcmp(env->name, name) == 0)
 			return (env);
 		env = env->next;
 	}

@@ -1,40 +1,28 @@
-CFLAGS = -Wall -Wextra -Werror
-CC = cc
+CFLAGS = -Wall -Wextra -Werror 
+
+CC = cc #-fs+anitize=address -g3
 LFLAGS = -lreadline
 NAME = minishell
 
-# Use wildcard to gather all .c files from libft and libftt directories
-SRCS =  mnsh.c \
-        parsing/main.c \
-        parsing/analyse_tokens.c \
-        parsing/expand.c \
-        parsing/token_into_stack.c \
-        parsing/signal_handle.c \
-        parsing/postfix_to_tree.c \
-        parsing/minishell_utils.c \
-        parsing/tokenization.c \
-        parsing/infix_to_postfix.c \
-        parsing/pipex_utils.c \
-        parsing/parser.c \
+SRCS  = $(wildcard externel_folder/libftt/*.c) \
+        $(wildcard externel_folder/gnl/*.c) \
+		$(wildcard parsing/tokens/*.c) \
+        $(wildcard parsing/parser/*.c) \
+        $(wildcard parsing/signal/*.c) \
+        $(wildcard parsing/minishel_utils/*.c) \
+        $(wildcard parsing/generate_struct/*.c) \
         execution/builtins/cd/cd.c \
-        execution/builtins/echo/echo.c \
-        execution/builtins/env/env.c \
+		execution/builtins/echo/echo.c \
+       	execution/builtins/env/env.c \
         execution/builtins/exit/exit.c \
         execution/builtins/pwd/pwd.c \
         execution/builtins/unset/unset.c \
-        execution/builtins/builtins.c \
-		execution/builtins/export/export.c \
-        execution/handle_command.c \
-        execution/handle_pipe.c \
-        execution/utils.c \
-        execution/postorde.c \
-        execution/handle_in_out.c \
-        $(wildcard libft/*.c) \
-        $(wildcard execution/libftt/*.c) \
-        $(wildcard parsing/gnl/*.c)
-        # execution/herdoc_.c \
+	  	execution/builtins/export/export.c \
+        mnsh.c \
+        execution/executing.c \
+        # execution/builtins/builtins.c \
+        $(wildcard execution/*.c) \
 
-# Generate object file names from source file names
 OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)

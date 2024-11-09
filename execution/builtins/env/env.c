@@ -1,5 +1,4 @@
 #include "../../../minishell.h"
-#include "../../libftt/libft.h"
 
 int ft_env(t_envi *env)
 {

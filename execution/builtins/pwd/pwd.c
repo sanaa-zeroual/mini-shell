@@ -1,5 +1,5 @@
 #include "../../../minishell.h"
-#include "../../libftt/libft.h"
+#include "../../../externel_folder/libftt/libft.h"
 
 // int ft_pwd(char **av)
 // {

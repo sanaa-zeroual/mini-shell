@@ -18,8 +18,8 @@ char **separate_env(t_envi *env)
     int i = 0;
     while (env)
     {
-        size_t name_len = strlen(env->name);
-        size_t value_len = strlen(env->vale);
+        size_t name_len = ft_strlen(env->name);
+        size_t value_len = ft_strlen(env->vale);
         the_env[i] = malloc(name_len + value_len + 2);
         if (!the_env[i])
         {

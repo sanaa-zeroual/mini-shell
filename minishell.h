@@ -1,267 +1,290 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: shebaz <shebaz@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/23 15:39:23 by shebaz            #+#    #+#             */
+/*   Updated: 2024/11/07 14:47:43 by shebaz           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef MINISHELL_H
-#define MINISHELL_H
+# define MINISHELL_H
 
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <stdio.h>
-#include "parsing/gnl/get_next_line.h"
-#include "execution/libftt/libft.h"
-#include <stdlib.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdbool.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+# include "externel_folder/gnl/get_next_line.h"
+# include "externel_folder/libftt/libft.h"
+# include <fcntl.h>
+# include <limits.h>
+# include <readline/history.h>
+# include <readline/readline.h>
+# include <signal.h>
+# include <stdbool.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+#include <sys/stat.h>
+# include <sys/types.h>
+# include <sys/wait.h>
+# include <unistd.h>
+#include <errno.h>
+# define SIGINT 2 
+# define SIGQUIT 3
+# define SIGTERM 15
 
-#include <limits.h>
-#include <signal.h>
-#include <unistd.h>
-
-#define PREC_WHITESPACES          25  
-#define PREC_BACKTICK             24
-#define PREC_DOLLAR               23
-#define PREC_TILDLE               22 
-#define PREC_PARENTHESES          21 
-#define PREC_LOGICAL_NOT          20 
-#define PREC_ASTERISK             19 
-#define PREC_SLASH                18
-#define PREC_BACKSLASH            17 
-#define PREC_QUESTION             16
-#define PREC_DOT                  15
-#define PREC_ADDITIVE             14
-#define PREC_ASSIGNMENT           13
-#define PREC_AMPERSAND            12
-#define PREC_LOGICAL_AND          11 
-#define PREC_PIPE                 9  // LOWER than redirection
-#define PREC_LOGICAL_OR           8
-#define PREC_REDIR_IN             10  // HIGHER than pipe
-#define PREC_REDIR_OUT            10  // HIGHER than pipe
-#define PREC_REDIR_APPEND         10  // HIGHER than pipe
-#define PREC_REDIR_HERE_DOC       10  // HIGHER than pipe
-#define PREC_SEMICOLON            4
-#define PREC_COLON                3 
-#define PREC_NEW_LINE             2
-
+// typedef struct s_mini
+// {
+//     t_envi *env;
+//     t_shell *shell;
+//     char **ptr;
+//     char **arr;
+// }t_mini;
 
 typedef enum
 {
-	TOKEN_DOUBLE_AMP,     // "&&"
-	TOKEN_TILDLE,         // "~"
-	TOKEN_PIPE,           // "|"
-	TOKEN_DOUBLE_PIPE,    // "||"
-	TOKEN_REDIR_IN,       //"<"
-	TOKEN_REDIR_OUT,      //">"
-	TOKEN_REDIR_APPEND,   // ">>"
-	TOKEN_REDIR_HERE_DOC, // "<<"
-	TOKEN_DOLLAR,         // "$"
-	TOKEN_OPEN_PARENTH,   // "( , [  , {"
-	TOKEN_CLOSE_PARENTH,  // ") , ] , ]"
-	TOKEN_COMMAND,
-	TOKEN_OPTION,
+	TOKEN_TILDLE,
+	TOKEN_PIPE,
+	TOKEN_REDIR_IN,
 	TOKEN_DOUBLE_QUOTED,
-	TOKEN_BUILT_IN,
 	TOKEN_SINGLE_QUOTED,
-	TOKEN_ARGUMENT, // String
+	TOKEN_OPEN_PARENTH,
+	TOKEN_CLOSE_PARENTH,
+	TOKEN_REDIR_OUT,
+	TOKEN_REDIR_APPEND,
+	TOKEN_REDIR_HERE_DOC,
+	TOKEN_COMMAND,
+	DELIMITER,
+	TOKEN_OPTION,
+	TOKEN_BUILT_IN,
+	TOKEN_ARGUMENT,
 	TOKEN_UNKNOWN
-}					TokenType;
-
-typedef struct token
+}
+					TokenType;
+typedef enum
 {
-	TokenType		type;
-	char			*value;
-	char			**expanded_value;
-	struct token	*next;
-	struct token	*previous;
-}					Token;
-
-typedef enum 
+	PIPE,
+	RE_OUT,
+	RE_IN,
+	RE_HEREDOC,
+	RE_APPEND,
+	UNKOWN
+}					t_type;
+typedef struct s_shell
 {
-	COMMAND,
-	PIPELINE,
-	REDERECTION_IN,
-	REDERECTION_OUT,
-	REDERECTION_APPEND,
-	REDERECTION_HEREDOC,
-	REDERECTION_SEMICOLON,
-}AST_TYPE;
-
-typedef struct parse
-{
-	Token		*token;
-	char		**arguments;
-	int         input_fd;
-	int         output_fd;
-	struct parse *next;
-}t_parser;
-
-
-typedef struct s_ast
-{
-	t_parser		*data;
-	AST_TYPE		type;
-	struct s_ast	*left;
-	struct s_ast	*right;
-	struct s_ast	*next;
-}					t_ast;
-
-typedef struct queue
-{
-	Token			*node;
-	char				**arg;
-	struct queue	*next;
-}					t_queue;
-
-typedef struct stack
-{
-	t_parser			*node;   // Changed to t_ast pointer
-	struct stack		*next;
-}					t_stack;
-
-			//**Tokenization**/
-Token	**tokenize(char *input);
-void	add_token(Token **tokens, TokenType type, const char *value);
-char *handle_quote(char *str);
-
-// void	print_tokens(Token *tokens);
-
-			//**libft**/
-// char	**ft_split(char *s, char c);
-char	*ft_strjoin(char const *s1, char const *s2);
-// char	*ft_strtrim(char *s1, char *set);
-
-		    //pipex_utils
-char	*get_executable(char *command);
-
-			//generate_postfix
-t_queue *generate_postfix(t_parser *tokens);
-int		get_precedence(int token_type);
-void	transfer_tokens_to_stack(t_parser *token_list, t_stack **stack);
-int		check_precedence(t_stack *stack, int token_type);
-void	push_back_stack(t_stack **src, t_stack **dest);
-
-			//abstract syntax tree
-t_ast	*generate_ast_from_postfix(t_queue *postfix_output);
-t_stack *pop_stack(t_stack **stack);
-t_ast	*pop_ast_stack(t_ast **ast_stack);
-int		is_operator(Token *node);
-int		is_operand(Token *node);
-t_ast	*push_to_ast_stack(t_ast *ast_stack, t_ast *ast_node);
-
-			//mini_utils
-t_stack	*new_stack_node(t_parser *token);
-int		check_syntax_errors(Token *tokens);
-char	quote_type(const char *str);
-Token	*create_token(TokenType type, const char *value);
-char	*char_to_string(char c, char c2);
-int		get_token_type(const char *token, char c);
-void print_tokens(t_parser *tokens);
-
-			//signals
-void handle_signal();
-			//expand
-void expand(Token *tokens);
-
-				//analyse_tokens
-t_parser *analyse_tokens(Token **tokens);
-
-				//signals
-void handle_ctrl_c();
-void handle_ctrl_d();
-
-Token *get_last_token(Token *token);
-
-// void print_queue(t_queue *queue);
-int	ft_counter(char *str, char c);
-int ft_is_separator(char c);
-void print_ast(t_ast *ast, int depth);
-
-
-///////////////////// execution /////////////////////////
+	int				exit_status;
+	char			**args;
+}					t_shell;
 
 typedef struct s_env
 {
-	char					*name;
-	char					*vale;
-	struct s_env			*next;
-    struct s_env             *prv;
-}							t_envi;
+	char			*name;
+	char			*vale;
+	struct s_env	*next;
+	struct s_env	*prv;
+}					t_envi;
 
-typedef struct  s_pipe
-{
-	int write_end;
-	int read_end;
-}						t_pipe;
-
-// typedef struct  s_exec
-// {
-//     char **args;
-//     char
-
-// }       t_exec;
-
-//exit 
-typedef struct s_shell
-{
-    int exit_status;
-    char **args;
-} t_shell;
 
 typedef struct s_mini
 {
-    t_envi *env;
-    t_shell *shell;
-    char **ptr;
-    char **arr;
-}t_mini;
+	t_envi			*env;
+	t_shell			*shell;
+	char			**ptr;
+	char			**arr;
+	int				last_exit_status;
+}					t_mini;
+typedef struct token
+{
+	TokenType					type;
+	char						*value;
+	char						**expanded_value;
+	struct token				*next;
+	struct token				*previous;
+}								t_token;
 
-		//redirections
+typedef struct s_file
+{
+    char *filename;
+    int type;
+    char *red; // The path of the redirection
+    struct s_file *next;
+} t_file;
 
-int redir_fd_in(t_ast *cmd);
-int redir_fd_out(t_ast *cmd);
+typedef struct s_cmd
+{
+    t_type type;
+    char **arguments;
+    t_file *file;
+    struct s_cmd *prev;
+    struct s_cmd *next;
+    char *cmd_path; // The path of the command
+    int fd_in;
+    int fd_out;
+    int pipe_fd[2];
+    int pid;
+} t_cmd;
 
-		//pipeline
+typedef struct s_var
+{
+    int exit_status; // The exit status
+    t_mini *box;     // Need to access env
+    int out_fd;
+    int red_error;
+    int pre_pipe_infd;
+    int last_child_id;
+    char **envp;
+    int size;
+} t_var;
 
-pid_t right_pipe(t_ast *cmd, t_pipe *pipe_fds, t_mini *box);
-pid_t left_pipe(t_ast *cmd, t_pipe *pipe_fds, t_mini *box);
-void execute_pipeline(t_ast *cmd, t_mini *box);
+extern t_var g_var; // Declare the global variable
 
-		//builtins
-		
-int builtins(char **av, t_mini *box);
-int is_builtin(char *cmd);
-void ft_putstr_fd(char *str, int fd);
+typedef struct garbage_collector
+{
+	void						*ptr;
+	struct garbage_collector	*next;
+}								t_gc;
+
+typedef struct global
+{
+	int 	exit_status;
+	t_gc	*head;
+}globalvar;
+
+extern globalvar var;
+
+t_token							**tokenize(char *input);
+char							*handle_quote(char *str);
+int								is_special(char c);
+int								dollar_counter(char *input);
+char							*single_quote_expansion(char *input, int *i);
+char							*double_quote_expansion(char *input, int *i);
+int								is_quoted(char *input);
+char							*expand_non_operator(char *token);
+int								built_in_checker(const char *str);
+void							add_token(t_token **tokens, TokenType type,
+									char *value, int *k);
+char							*get_executable(char *command);
+char							*get_inside_quote(char *tmp, int *i, int *j);
+char							*process_delimiter(char *tmp);
+void							handle_heredoc(t_token **tokens, char *input,
+									int *i);
+void							heredoc_process(t_cmd **node, t_file **head,
+									t_token **tokens);
+char							*tidle_expansion(int *i);
+void							fill_up_node(t_cmd **node, t_token **tokens, t_file *head);
+char							*dollar_expand(char *input, int *i);
+void							go_to_next(t_token **tokens);
+char							**result_traitement(char *input);
+char							*get_string(char *input, int *i);
+int								get_size(char **arr);
+int								get_size_arr(char *input);
+char							*parse_line(char *input);
+char							**handle_that_shit(char *input);
+char							**unquoted_result(char **input);
+char							*get_word_to_expand(char *str, int *j);
+void							add_quote(char *input, char **expanded_value,
+									int *j);
+int								is_operator(t_token *node);
+int								is_operand(t_token *node);
+int								handle_consecutive_operator(t_token *tokens);
+int								handle_paren(t_token *token);
+int								handle_quotes(t_token *tokens);
+int								check_token(char *str, char c);
+t_token							*get_last_token(t_token *token);
+int								handle_operators_bg_en(t_token *tokens);
+int								check_syntax_errors(t_token *tokens);
+char							quote_type(const char *str);
+char							*char_to_string(char c, char c2);
+int								get_token_type(const char *token, char c);
+void							handle_signal(void);
+void							handle_ctrl_d(void);
+void							handle_ctrl_c(void);
+int								expand(t_token *tokens);
+t_cmd							*analyse_tokens(t_token **tokens);
+void							handle_ctrl_c(void);
+void							handle_ctrl_d(void);
+int								ft_is_separator(char c);
+void							print_cmd(t_cmd *cmd);
+int								is_red(t_token *token);
+int								get_red_type(t_token *token);
+int								nbr_argument(t_token *tokens);
+void							push_back(t_cmd **lst, t_cmd *node);
+void							push_t_file(t_file **head, t_file *node);
+void							*ft_malloc(size_t size, int ele_nbr);
+void							clean_gc(void);
+
+///////////////////// execution /////////////////////////
+
+
+// int					builtins(char **av, t_mini *box);
+int					is_builtin(char *cmd);
+void				ft_putstr_fd(char *str, int fd);
+int					ft_cd(char **ptr, t_envi *envi);
+void				update_env(t_envi *envi);
+t_envi				*search_env(t_envi *envi, char *name);
+int					is_n_option(char *arg);
+int					first_non_option(char **args);
+int					ft_echo(char **args);
+int					ft_unset(char **ptr, t_mini *box);
+void				ft_remove(t_mini *box);
+int					f__plus(char *r);
+int					ft_export(char **ptr, t_envi *env);
+int					ft_pwd(t_envi *env);
+int					ft_exit(t_shell *shell);
+int					ft_env(t_envi *env);
+/////////////////////////////builtins///////////////////////////
+
 int	ft_cd(char **ptr, t_envi *envi);
 void	update_env(t_envi *envi);
 t_envi	*search_env(t_envi *envi, char *name);
-int is_n_option(char *arg);
-int first_non_option(char **args);
 int ft_echo(char **args);
-int	ft_unset(char **ptr, t_mini *box);
-void ft_remove(t_mini *box);
-int	f__plus(char *r);
+int first_non_option(char **args);
+int is_n_option(char *arg);
 int	ft_export(char **ptr, t_envi *env);
-int ft_pwd( t_envi *env);
+int	add_one(char **ptr, t_envi *env);
+int	process_single_env(char *ptr_i, t_envi *env);
+int	process_single_env(char *ptr_i, t_envi *env);
+int	process_single_env(char *ptr_i, t_envi *env);
+int	ft_unset(char **ptr, t_mini *box);
+void	ft_remove(t_mini *box);
+// int	ft_pwd(t_envi *env);
 int	ft_exit(t_shell *shell);
-int ft_env(t_envi *env);
+int	ft_env(t_envi *env);
 
-		//extenal command
-char **separate_env(t_envi *env);
-char **get_command(t_ast *cmd);
-char **get_path();
-int count_arguments(char **arguments);
-void executing(t_ast *node, t_mini *box);
-void algo_execution(t_ast *cmd, t_mini *box);
-int handle_redir(t_ast *root, t_mini *box);
-int manage_io(t_ast *root);
-int handle_hd(char *delim, int expand, t_mini *box);
-char *expand_doc(char *s, t_mini *box);
-ssize_t calc_len(char *s, t_mini *box);
-void exec_cmd(t_ast *cmd, t_mini *box);
-int rfd_out(t_ast *cmd);
-char *expand_var(char *s, ssize_t *i, t_mini *box);
-int rfd_in(t_ast *cmd);
-void algo_execution(t_ast *cmd, t_mini *box);
-int is_identifier(int c);
-int is_identifier(int c);
-void exec_command_with_redirection(t_ast *cmd);
+
+// extenal command
+
+char				**separate_env(t_envi *env);
+char				**get_path(void);
+int					count_arguments(char **arguments);
+
+void execute_pipe(t_cmd *cmd, t_mini *box);
+
+
+////////////////////////////////new shell////////////////////////////////
+void validate_cmd(t_cmd *cmd);
+char *allocate_folders(char *path, int i);
+void check_cmd_path(t_cmd *cmd);
+char *r_quotes(char *str);
+void my_strncpy(char *dest, const char *src, size_t n);
+int check_path(char *path, int builtin);
+void check_command_name(t_cmd *cmd);
+void child_process(t_cmd *cmd, int pipe_nb, int btn, t_mini *box);
+void execute_arguments(t_cmd *cmd, t_mini *box);
+void sig_wait(t_cmd *cmd);
+void execute_pipes(t_cmd *cmd, int pipe_nb, t_mini *box);
+// void exec_builtin(int btn, t_cmd *cmd);
+// int check_builtin(t_cmd *cmd);
+void handle_file_redirections(t_cmd *cmd, int btn);
+void execs(t_cmd *cmd, int btn, t_mini *box);
+void files_redirections(t_cmd *cmd, int builtin);
+void append_file_prep(t_cmd *cmd, char *path, int is_builtin);
+void out_file_prep(t_cmd *cmd, char *path, int is_builtin);
+void in_file_prep(t_cmd *cmd, char *path, int is_builtin);
+int check_file_errors(char *path, int builtin);
+void handle_file_redirections(t_cmd *cmd, int btn);
+int check_builtin(t_cmd *cmd);
+
+
+
 #endif
