@@ -14,6 +14,18 @@
 
 t_var g_var;
 
+void initilized_g_var()
+{
+    g_var.exit_status = 0;
+    g_var.pre_pipe_infd = -1;
+    g_var.last_child_id = 0;
+    g_var.out_fd = -1;
+    g_var.red_error = 0;
+    g_var.envp = NULL;
+    g_var.size = 0;
+    g_var.pipe_nb = 0;
+}
+
 t_shell *init_shell()
 {
     t_shell *shell = ft_malloc(sizeof(t_shell), 1);
@@ -26,6 +38,7 @@ t_shell *init_shell()
     shell->args = NULL;
     return shell;
 }
+
 t_envi *init_env(char **envp)
 {
     t_envi *env_list = NULL;
@@ -47,7 +60,7 @@ t_envi *init_env(char **envp)
         value = strtok(NULL, "=");
         if (!name || !value)
         {
-            fprintf(stderr, "Invalid environment variable format: %s\n", envp[i]);
+            perror("error");
             free(env_entry);
             i++;
             continue;
@@ -80,6 +93,7 @@ t_envi *init_env(char **envp)
     }
     return env_list;
 }
+
 void	print_cmd(t_cmd *cmd)
 {
 	int	i;
@@ -120,6 +134,9 @@ int main(int argc, char **argv, char **envp)
 
     tokens = NULL;
     box = ft_malloc(sizeof(t_mini), 1);
+    initilized_g_var();
+    // g_var.size = count_commands(cmd);
+    // g_var.pipe_nb = g_var.size - 1;
     if (!box)
     {
         perror("malloc");

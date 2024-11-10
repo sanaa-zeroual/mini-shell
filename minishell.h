@@ -70,6 +70,13 @@ typedef enum
 	RE_APPEND,
 	UNKOWN
 }					t_type;
+
+typedef struct s_alst
+{
+	void *content;
+	struct s_alst *next;
+}t_alst;
+
 typedef struct s_shell
 {
 	int				exit_status;
@@ -93,6 +100,7 @@ typedef struct s_mini
 	char			**arr;
 	int				last_exit_status;
 }					t_mini;
+
 typedef struct token
 {
 	TokenType					type;
@@ -118,22 +126,23 @@ typedef struct s_cmd
     struct s_cmd *prev;
     struct s_cmd *next;
     char *cmd_path; // The path of the command
-    int fd_in;
-    int fd_out;
     int pipe_fd[2];
     int pid;
 } t_cmd;
 
 typedef struct s_var
 {
+	t_alst *alist;
     int exit_status; // The exit status
     t_mini *box;     // Need to access env
     int out_fd;
-    int red_error;
-    int pre_pipe_infd;
+	int in_fd;
+    int red_error; //error  for redir
+    int pre_pipe_infd; // si il ya une commande avant le pipe
     int last_child_id;
     char **envp;
-    int size;
+	int pipe_nb; // the number of pipes 
+    int size; // the size of the command
 } t_var;
 
 extern t_var g_var; // Declare the global variable
@@ -265,7 +274,6 @@ void execute_pipe(t_cmd *cmd, t_mini *box);
 void validate_cmd(t_cmd *cmd);
 char *allocate_folders(char *path, int i);
 void check_cmd_path(t_cmd *cmd);
-char *r_quotes(char *str);
 void my_strncpy(char *dest, const char *src, size_t n);
 int check_path(char *path, int builtin);
 void check_command_name(t_cmd *cmd);
@@ -278,13 +286,13 @@ void execute_pipes(t_cmd *cmd, int pipe_nb, t_mini *box);
 void handle_file_redirections(t_cmd *cmd, int btn);
 void execs(t_cmd *cmd, int btn, t_mini *box);
 void files_redirections(t_cmd *cmd, int builtin);
-void append_file_prep(t_cmd *cmd, char *path, int is_builtin);
-void out_file_prep(t_cmd *cmd, char *path, int is_builtin);
-void in_file_prep(t_cmd *cmd, char *path, int is_builtin);
+void append_file_prep(char *path);
+void out_file_prep(char *path);
+void in_file_prep(char *path);
 int check_file_errors(char *path, int builtin);
 void handle_file_redirections(t_cmd *cmd, int btn);
 int check_builtin(t_cmd *cmd);
-
+int count_commands(t_cmd *cmd);
 
 
 #endif
