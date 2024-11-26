@@ -1,0 +1,15 @@
+total 108
+drwxr-xr-x  8 szeroual 4221   200 Nov 17 10:16 .
+drwx------ 64 szeroual 4221  4096 Nov 17 10:16 ..
+drwxr-xr-x  8 szeroual 4221   185 Nov 16 10:58 .git
+drwxr-xr-x  2 szeroual 4221    27 Nov 16 09:24 .vscode
+-rw-r--r--  1 szeroual 4221  1001 Nov 17 09:42 Makefile
+drwxr-xr-x  8 szeroual 4221   217 Nov 16 14:41 c_formatter_42
+drwxr-xr-x  4 szeroual 4221    34 Nov 17 09:37 execution
+drwxr-xr-x  4 szeroual 4221    31 Nov 16 09:24 externel_folder
+-rwxr-xr-x  1 szeroual 4221 67992 Nov 17 10:16 minishell
+-rw-r--r--  1 szeroual 4221  9207 Nov 17 09:42 minishell.h
+-rw-r--r--  1 szeroual 4221  4484 Nov 16 09:24 mnsh.c
+-rw-r--r--  1 szeroual 4221  5424 Nov 17 10:16 mnsh.o
+drwxr-xr-x  7 szeroual 4221    93 Nov 16 09:24 parsing
+-rwxr-xr-x  1 szeroual 4221     0 Nov 17 10:16 tr

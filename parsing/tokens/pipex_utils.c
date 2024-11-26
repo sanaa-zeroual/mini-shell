@@ -20,8 +20,8 @@ char	*find_command_path(char **dir, char *command)
 	i = 0;
 	while (dir[i])
 	{
-		full_path = ft_malloc(sizeof(char),
-				ft_strlen(dir[i]) + ft_strlen(command) + 2);
+		full_path = ft_malloc(sizeof(char), ft_strlen(dir[i])
+				+ ft_strlen(command) + 2);
 		if (!full_path)
 		{
 			perror("malloc");

@@ -6,7 +6,7 @@
 /*   By: shebaz <shebaz@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 13:36:37 by shebaz            #+#    #+#             */
-/*   Updated: 2024/11/07 13:44:39 by shebaz           ###   ########.fr       */
+/*   Updated: 2024/11/08 23:17:20 by shebaz           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void	handle_word(char *input, t_token **tokens, int *j, int *k)
 		if (input[i] == '"' || input[i] == '\'')
 		{
 			str = handle_quote(input + i);
-			i += ft_strlen(str);
+			i += ft_strlen(str) - 1;
 		}
 		i++;
 	}

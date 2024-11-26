@@ -6,7 +6,7 @@
 /*   By: shebaz <shebaz@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 19:05:46 by shebaz            #+#    #+#             */
-/*   Updated: 2024/11/07 13:42:23 by shebaz           ###   ########.fr       */
+/*   Updated: 2024/11/13 14:41:55 by shebaz           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ void	heredoc_process(t_cmd **node, t_file **head, t_token **tokens)
 
 	(*tokens) = (*tokens)->next;
 	processed_del = process_delimiter((*tokens)->value);
+	printf("processes_del === %s\n", processed_del);
 	fd = open((*tokens)->value, O_CREAT | O_TRUNC | O_RDWR, 0777);
 	while (1)
 	{
@@ -51,8 +52,8 @@ void	red_process(t_token **tokens, t_cmd **node, int *i)
 			heredoc_process(node, &head, tokens);
 		if ((*tokens) && is_red(*tokens)
 			&& (*tokens)->type != TOKEN_REDIR_HERE_DOC)
-			fill_up_node(node, tokens, head);
-		while ((*tokens) && !is_red(*tokens))
+			fill_up_node(node, tokens, &head);
+		while ((*tokens) && !is_red(*tokens) && (*tokens)->type != TOKEN_PIPE)
 		{
 			(*node)->arguments[(*i)++] = ft_strdup((*tokens)->value);
 			(*tokens) = (*tokens)->next;
@@ -72,6 +73,9 @@ char	*process_delimiter(char *tmp)
 	result = ft_strdup("");
 	while (tmp[i])
 	{
+		if (tmp[i] == '$' && tmp[i + 1]
+			&& (tmp[i + 1] == '"' || tmp[i + 1] == '\''))
+			i++;
 		j = i;
 		if (tmp[i] == '"' || tmp[i] == '\'')
 			hp = get_inside_quote(tmp, &i, &j);
@@ -93,11 +97,6 @@ void	create_node_arguments(t_cmd **node, t_token **tokens)
 
 	i = 0;
 	(*node)->arguments = ft_malloc(sizeof(char *), nbr_argument(*tokens) + 1);
-	if ((*tokens)->expanded_value && (*tokens)->expanded_value[0])
-	{
-		(*node)->arguments[i++] = ft_strdup((*tokens)->expanded_value[0]);
-		(*tokens) = (*tokens)->next;
-	}
 	while (*tokens && (*tokens)->type != TOKEN_PIPE)
 	{
 		j = 0;

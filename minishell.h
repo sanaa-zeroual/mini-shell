@@ -6,7 +6,7 @@
 /*   By: shebaz <shebaz@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 15:39:23 by shebaz            #+#    #+#             */
-/*   Updated: 2024/11/07 14:47:43 by shebaz           ###   ########.fr       */
+/*   Updated: 2024/11/19 10:00:21 by shebaz           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ typedef struct s_shell
 typedef struct s_env
 {
 	char			*name;
-	char			*vale;
+	char			*vale; 
 	struct s_env	*next;
 	struct s_env	*prv;
 }					t_envi;
@@ -123,6 +123,7 @@ typedef struct s_cmd
     t_type type;
     char **arguments;
     t_file *file;
+	int is_herdoc_end;
     struct s_cmd *prev;
     struct s_cmd *next;
     char *cmd_path; // The path of the command
@@ -134,18 +135,16 @@ typedef struct s_var
 {
 	t_alst *alist;
     int exit_status; // The exit status
-    t_mini *box;     // Need to access env
     int out_fd;
 	int in_fd;
     int red_error; //error  for redir
     int pre_pipe_infd; // si il ya une commande avant le pipe
     int last_child_id;
     char **envp;
-	int pipe_nb; // the number of pipes 
+	int	pipe_nb; // the number of pipes 
     int size; // the size of the command
 } t_var;
 
-extern t_var g_var; // Declare the global variable
 
 typedef struct garbage_collector
 {
@@ -155,17 +154,37 @@ typedef struct garbage_collector
 
 typedef struct global
 {
-	int 	exit_status;
-	t_gc	*head;
-}globalvar;
+	int							exit_status;
+	int							pre_pipe_infd;
+	int							last_child_id;
+	int							in_fd;
+	int							out_fd;
+	int							red_error;
+	t_envi						*envp;
+	int							size;
+	int							pipe_nb;
+	int							fd_here_doc;
+	t_gc						*head;
 
-extern globalvar var;
+}								t_globalvar;
+
+extern t_globalvar				*g_var;
 
 t_token							**tokenize(char *input);
 char							*handle_quote(char *str);
+int								is_charactere(char c);
+void							case_function(char *input, char **result,
+									int *j);
 int								is_special(char c);
+int								check_quote(char *str);
+int								is_number(char c);
+int								one_dollar_test_case(int dollar_count,
+									char *input, int *i);
 int								dollar_counter(char *input);
+void							exit_status_case(char *input, char **result,
+									int *i, int *flag);
 char							*single_quote_expansion(char *input, int *i);
+char							*process_word(char *word);
 char							*double_quote_expansion(char *input, int *i);
 int								is_quoted(char *input);
 char							*expand_non_operator(char *token);
@@ -180,17 +199,20 @@ void							handle_heredoc(t_token **tokens, char *input,
 void							heredoc_process(t_cmd **node, t_file **head,
 									t_token **tokens);
 char							*tidle_expansion(int *i);
-void							fill_up_node(t_cmd **node, t_token **tokens, t_file *head);
+void							fill_up_node(t_cmd **node, t_token **tokens,
+									t_file **head);
 char							*dollar_expand(char *input, int *i);
 void							go_to_next(t_token **tokens);
 char							**result_traitement(char *input);
 char							*get_string(char *input, int *i);
 int								get_size(char **arr);
 int								get_size_arr(char *input);
+int								file_expansion_null(t_token *tokens);
 char							*parse_line(char *input);
 char							**handle_that_shit(char *input);
 char							**unquoted_result(char **input);
-char							*get_word_to_expand(char *str, int *j);
+char							*get_word_to_expand(char *str, int *j,
+									char **result);
 void							add_quote(char *input, char **expanded_value,
 									int *j);
 int								is_operator(t_token *node);
@@ -209,6 +231,7 @@ void							handle_signal(void);
 void							handle_ctrl_d(void);
 void							handle_ctrl_c(void);
 int								expand(t_token *tokens);
+char							*ft_getenv(char *word);
 t_cmd							*analyse_tokens(t_token **tokens);
 void							handle_ctrl_c(void);
 void							handle_ctrl_d(void);
@@ -221,44 +244,40 @@ void							push_back(t_cmd **lst, t_cmd *node);
 void							push_t_file(t_file **head, t_file *node);
 void							*ft_malloc(size_t size, int ele_nbr);
 void							clean_gc(void);
-
+t_envi							*init_env(char **envp);
 ///////////////////// execution /////////////////////////
 
-
-// int					builtins(char **av, t_mini *box);
-int					is_builtin(char *cmd);
-void				ft_putstr_fd(char *str, int fd);
-int					ft_cd(char **ptr, t_envi *envi);
-void				update_env(t_envi *envi);
-t_envi				*search_env(t_envi *envi, char *name);
-int					is_n_option(char *arg);
-int					first_non_option(char **args);
-int					ft_echo(char **args);
-int					ft_unset(char **ptr, t_mini *box);
-void				ft_remove(t_mini *box);
-int					f__plus(char *r);
-int					ft_export(char **ptr, t_envi *env);
-int					ft_pwd(t_envi *env);
-int					ft_exit(t_shell *shell);
-int					ft_env(t_envi *env);
 /////////////////////////////builtins///////////////////////////
+int								is_builtin(char *cmd);
+void							ft_putstr_fd(char *str, int fd);
+int								ft_cd(char **ptr, t_envi *envi);
+void							update_env(t_envi *envi);
+t_envi							*search_env(t_envi *envi, char *name);
+int								is_n_option(char *arg);
+int								first_non_option(char **args);
+int								ft_echo(char **args);
+int								ft_unset(char **ptr, t_mini *box);
+int								ft_pwd(char **args, t_envi *env);
+int								ft_exit(char **args);
+int								ft_env(t_envi *env);
+void							add_env_variable(t_envi **env, char *name,
+									char *value);
+t_envi							*sort_env(t_envi *env);
+int								ft_utils(char *ptr);
+void							swap_nodes(t_envi *a, t_envi *b);
+t_envi							*cpy_list(t_envi *env);
+int								check_each_element(char *str);
+void							ft_remove(char **ptr, t_mini *box, int i);
 
-int	ft_cd(char **ptr, t_envi *envi);
-void	update_env(t_envi *envi);
-t_envi	*search_env(t_envi *envi, char *name);
-int ft_echo(char **args);
-int first_non_option(char **args);
-int is_n_option(char *arg);
-int	ft_export(char **ptr, t_envi *env);
-int	add_one(char **ptr, t_envi *env);
-int	process_single_env(char *ptr_i, t_envi *env);
-int	process_single_env(char *ptr_i, t_envi *env);
-int	process_single_env(char *ptr_i, t_envi *env);
-int	ft_unset(char **ptr, t_mini *box);
-void	ft_remove(t_mini *box);
-// int	ft_pwd(t_envi *env);
-int	ft_exit(t_shell *shell);
-int	ft_env(t_envi *env);
+int								ft_cd(char **ptr, t_envi *envi);
+void							update_env(t_envi *envi);
+t_envi							*search_env(t_envi *envi, char *name);
+int								ft_echo(char **args);
+int								first_non_option(char **args);
+int								is_n_option(char *arg);
+int								ft_export(char **ptr, t_envi **env);
+int								ft_unset(char **ptr, t_mini *box);
+int								ft_env(t_envi *env);
 
 
 // extenal command
@@ -281,18 +300,32 @@ void child_process(t_cmd *cmd, int pipe_nb, int btn, t_mini *box);
 void execute_arguments(t_cmd *cmd, t_mini *box);
 void sig_wait(t_cmd *cmd);
 void execute_pipes(t_cmd *cmd, int pipe_nb, t_mini *box);
-// void exec_builtin(int btn, t_cmd *cmd);
-// int check_builtin(t_cmd *cmd);
+void exec_builtin(int btn, t_cmd *cmd, t_mini *box);
 void handle_file_redirections(t_cmd *cmd, int btn);
 void execs(t_cmd *cmd, int btn, t_mini *box);
 void files_redirections(t_cmd *cmd, int builtin);
 void append_file_prep(char *path);
-void out_file_prep(char *path);
-void in_file_prep(char *path);
+void out_file_prep(char *path, int builtin);
+void in_file_prep(char *path, int builtin);
 int check_file_errors(char *path, int builtin);
-void handle_file_redirections(t_cmd *cmd, int btn);
+// void handle_file_redirections(t_cmd *cmd, int btn);
 int check_builtin(t_cmd *cmd);
 int count_commands(t_cmd *cmd);
-
-
+void error_pipe();
+void close_files(t_cmd *token);
+t_envi *create_env_node(char *name, char *value);
+t_envi *create__node(char *name, char *value);
+void add_env_node(t_envi **env_list, t_envi *new_node);
+void	initiale_global(t_envi *env);
+void search_command_in_paths(t_cmd *cmd, char **path_dirs);
+void handle_command_not_found(t_cmd *cmd);
+void free_path_dirs(char **path_dirs);
+int is_executable(char *path);
+char *construct_full_path(char *dir, char *cmd);
+void error_strdup();
+void initialisation(t_mini *box, char **envp);
+void handle_input(char *input, t_mini *box);
+void shell_loop(t_mini *box);
+void process_env_entry(char *env_entry, t_envi **env_list);
+t_shell *init_shell();
 #endif

@@ -6,7 +6,7 @@
 /*   By: shebaz <shebaz@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/26 20:24:14 by shebaz            #+#    #+#             */
-/*   Updated: 2024/11/06 21:32:26 by shebaz           ###   ########.fr       */
+/*   Updated: 2024/11/09 10:20:47 by shebaz           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,30 +30,36 @@ t_token	*get_last_token(t_token *token)
 	return (token);
 }
 
-int	check_quote(char *str, char c)
+int	check_quote(char *str)
 {
-	int	count;
-	int	i;
+	int		i;
+	char	quote;
 
-	count = 0;
 	i = 0;
 	while (str[i])
 	{
-		if (str[i] == c)
-			count++;
-		i++;
+		if (str[i] == '"' || str[i] == '\'')
+		{
+			quote = str[i];
+			i++;
+			while (str[i] && str[i] != quote)
+				i++;
+			if (str[i] && str[i] == quote)
+				i++;
+			else
+				return (0);
+		}
+		else
+			i++;
 	}
-	if (!(count % 2))
-		return (1);
-	return (0);
+	return (1);
 }
 
 int	handle_quotes(t_token *tokens)
 {
 	while (tokens)
 	{
-		if (!check_quote(tokens->value, '"') || !check_quote(tokens->value,
-				'\''))
+		if (!check_quote(tokens->value))
 		{
 			printf("Syntax Error: unclosed quoted\n");
 			return (1);

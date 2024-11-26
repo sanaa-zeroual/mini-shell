@@ -1,16 +1,27 @@
-#include "../../../minishell.h"
-#include "../../../externel_folder/libftt/libft.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cd.c                                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: shebaz <shebaz@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/17 15:55:41 by shebaz            #+#    #+#             */
+/*   Updated: 2024/11/18 23:42:28 by shebaz           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-// t_envi	*search_env(t_envi *envi, char *name)
-// {
-// 	while (envi)
-// 	{
-// 		if (ft_strcmp(envi->name, name)==0)
-// 			return (envi);
-// 		envi = envi->next;
-// 	}
-// 	return (NULL);
-// }
+#include "../../../minishell.h"
+
+t_envi	*search_env(t_envi *env, char *name)
+{
+	while (env)
+	{
+		if (ft_strcmp(env->name, name) == 0)
+			return (env);
+		env = env->next;
+	}
+	return (NULL);
+}
 
 void	update_env(t_envi *envi)
 {
@@ -31,7 +42,9 @@ void	update_env(t_envi *envi)
 
 int	ft_cd(char **ptr, t_envi *envi)
 {
-	if (ptr[0] && !ptr[1]) 
+	if (get_size(ptr) > 2)
+		return (printf("cd: too many arguments\n"), 1);
+	if (ptr[0] && !ptr[1])
 	{
 		ptr[1] = (search_env(envi, "HOME"))->vale;
 		if (ptr[1] == NULL)

@@ -6,14 +6,11 @@
 /*   By: shebaz <shebaz@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 13:39:34 by shebaz            #+#    #+#             */
-/*   Updated: 2024/11/07 14:36:48 by shebaz           ###   ########.fr       */
+/*   Updated: 2024/11/13 15:23:53 by shebaz           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
-
-extern t_gc	*g_rt;
-t_gc		*g_rt = NULL;
 
 void	*ft_malloc(size_t size, int ele_nbr)
 {
@@ -23,8 +20,8 @@ void	*ft_malloc(size_t size, int ele_nbr)
 	ptr = malloc(ele_nbr * size);
 	node = malloc(sizeof(t_gc));
 	node->ptr = ptr;
-	node->next = g_rt;
-	g_rt = node;
+	node->next = g_var->head;
+	g_var->head = node;
 	return (ptr);
 }
 
@@ -32,13 +29,15 @@ void	clean_gc(void)
 {
 	t_gc	*temp;
 
-	while (g_rt)
+	while (g_var->head)
 	{
-		if (g_rt->ptr)
-			free(g_rt->ptr);
-		temp = g_rt;
-		g_rt = g_rt->next;
+		if (g_var->head)
+			free(g_var->head->ptr);
+		temp = g_var->head;
+		g_var->head = g_var->head->next;
 		if (temp)
 			free(temp);
 	}
+	free(g_var->head);
+	free(g_var);
 }

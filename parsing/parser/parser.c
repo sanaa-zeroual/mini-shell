@@ -6,7 +6,7 @@
 /*   By: shebaz <shebaz@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 13:46:11 by shebaz            #+#    #+#             */
-/*   Updated: 2024/11/07 14:16:05 by shebaz           ###   ########.fr       */
+/*   Updated: 2024/11/09 13:59:43 by shebaz           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,8 @@ int	check_syntax_errors(t_token *tokens)
 	if (handle_consecutive_operator(tokens))
 		return (4);
 	if (random_case(tokens))
+		return (2);
+	if (file_expansion_null(tokens))
 		return (2);
 	return (0);
 }
